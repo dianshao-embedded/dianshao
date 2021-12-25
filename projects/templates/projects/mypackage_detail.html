@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 50px">
+  <div class='row'>
+    <div class="three columns">
+    <h5> Add Local Files </h5>
+    </div>
+      <div class="three columns">
+        <a href="{% url 'projects:file_import' project_id mypackage_id %}" class="button" style="width: 200px;"> Import Exists Files </a>
+      </div>
+      <div class="three columns">
+          <a href="{% url 'projects:file_create' project_id mypackage_id %}" class="button" style="width: 200px;"> Create New Files </a>
+      </div>
+      <div class="three columns">
+        <a href="{% url 'projects:file_generate_patch' project_id mypackage_id %}" class="button" style="width: 200px;"> Create Patch </a>
+    </div>
+      <table class="u-full-width">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for localfile in localfiles %}
+          <tr>
+            <td>{{ localfile.name }}</td>
+            <td>{{ localfile.type }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
+</div>
+
+<div class="container", style="margin-top: 50px">
+  <h5> BB File Setting </h5>
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.version.label }}</label>
+        {{ form.version }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.type.label }}</label>
+        {{ form.type }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="three columns">
+        <label>{{ form.language.label }}</label>
+        {{ form.language }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.donwload_method.label }}</label>
+        {{ form.donwload_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.initial_method.label }}</label>
+        {{ form.initial_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.license_default.label }}</label>
+        {{ form.license_default }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    {% if form.type.value == "bb" %}
+    {% if form.license_default == '' %}
+    <div class="row">
+      <div class="two columns">
+        <label>{{ form.license.label }}</label>
+        {{ form.license }}
+      </div>
+      <div class="ten columns">
+        <label>{{ form.lic_files_chksum.label }}</label>
+        {{ form.lic_files_chksum }}
+      </div>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.depends.label }}</label>
+        {{ form.depends }}
+      </div>
+      <div class="six columns">
+        <label>{{ form.building_directory.label }}</label>
+        {{ form.building_directory }}
+      </div>
+    </div>
+    {% endif %}
+    {% if form.initial_method.value == 'Systemd' %}
+    <div class="row">
+      <div class="four columns">
+        <label>{{ form.systemd_auto_enable.label }}</label>
+        {{ form.systemd_auto_enable }}
+      </div>
+      <div class="eight columns">
+        <label>{{ form.systemd_service_name.label }}</label>
+        {{ form.systemd_service_name }}
+      </div>      
+    </div>
+    {% endif %}
+    {% if form.donwload_method.value != "local" %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.src_url.label }}</label>
+        {{ form.src_url }}
+      </div>
+    </div>
+    {% endif %}
+    {% if form.donwload_method.value == "wget" %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.src_url_md5.label }}</label>
+        {{ form.src_url_md5 }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.src_url_sha256.label }}</label>
+        {{ form.src_url_sha256 }}
+      </div>
+    </div>
+    {% endif %}
+    <input class="button" type="submit" style="width: 200px; margin-top: 10px;" value="Update Package">
+  </form>
+</div>
+
+<div class="container", style="margin-top: 50px">
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        <th>Tasks</th>
+        <th>Subtype</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ task.type }}</td>
+        <td>{{ task.subtype }}</td>
+        <td>{{ task.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class='row'>
+    <div class="three columns">
+    <a href="{% url 'projects:task_create' project_id mypackage_id %}" class="button" style="width: 200px;"> Add Task </a>
+    </div>
+  </div>
+</div>
+
+<div class="container", style="margin-top: 50px">
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        <th>Extra Marco</th>
+        <th>Value</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for extraMarco in extraMarcos %}
+      <tr>
+        <td>{{ extraMarco.name }}</td>
+        <td>{{ extraMarco.value }}</td>
+        <td>{{ extraMarco.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class='row'>
+    <div class="three columns">
+    <a href="{% url 'projects:extra_marco_create' project_id mypackage_id %}" class="button" style="width: 200px;"> Add Extra Marco </a>
+    </div>
+  </div>
+  <br>
+  <form action="{% url 'projects:mypackage_bbfile' project_id mypackage_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 400px; margin-top: 10px;" value="Generate bb/bbappend File">
+  </form>
+</div>
+
+<div class="container", style="margin-top: 30px; margin-bottom: 50px;">
+    <h5> Bitbake Test </h5>
+    <a href="{% url 'projects:mypackage_bitbake' project_id mypackage_id %}" class="button" style="width: 200px;"> Bitbake It! </a>
+</div>
+
+{% endblock %}

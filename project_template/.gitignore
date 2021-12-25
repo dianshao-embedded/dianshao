@@ -1,0 +1,14 @@
+
+# logfiles
+*.log
+
+# VSCode
+/vscode-bitbake-build
+
+# builds
+/build
+/deploy
+/docs/public/
+/*.img
+/*.mender
+

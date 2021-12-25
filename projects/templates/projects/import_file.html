@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <label>{{ form.name.label }}</label>
+    {{ form.name }}
+    <label>{{ form.path.label }}</label>
+    {{ form.path }}
+    <input class="button-primary" type="submit" value="Import File">
+  </form>
+</div>
+
+{% endblock %}

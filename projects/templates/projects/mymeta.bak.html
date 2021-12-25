@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container", style="margin-top: 30px">
+  <div class='row'>
+    <div class="three columns">
+      <a href="{% url 'projects:meta_create' project_id %}" class="button" style="width: 200px;">MY MACHINE</a>
+    </div>  
+    <div class="three columns">
+      <a href="{% url 'projects:meta_create' project_id %}" class="button" style="width: 200px;">MY FILESYSTEM</a>
+    </div>  
+    <div class="three columns">
+      <a href="{% url 'projects:myconf' project_id %}" class="button" style="width: 200px;">Extend CONF</a>
+    </div>    
+    <div class="three columns">
+      <a href="{% url 'projects:meta_create' project_id %}" class="button" style="width: 200px;">MY IMAGE</a>
+    </div>
+  </div>
+  </div>
+
+  <div class="container", style="margin-top: 60px;">
+    <div class='row'>
+      <div class="three columns">
+        <h5> My Packages </h5>
+      </div>  
+      <div class="three columns">
+        <a href="{% url 'projects:mypackage_create' project_id %}" class="button"> New Package </a>
+      </div>  
+    </div>
+    <table style="width: 960px; margin-top: 30px;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Version</th>
+          <th>Type</th>
+          <th>License</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mypackage in mypackages %}
+        <tr>
+          <td>{{ mypackage.name }}</td>
+          <td>{{ mypackage.description }}</td>
+          <td>{{ mypackage.version }}</td>
+          <td>{{ mypackage.type }}</td>
+          <td>{{ mypackage.license }}</td>
+          <td>
+            <a href="{% url 'projects:mypackage_detail' project_id mypackage.id %}" class="button">Details</a>
+            <a href="#" class="button">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.version.label }}</label>
+        {{ form.version }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.type.label }}</label>
+        {{ form.type }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="three columns">
+        <label>{{ form.language.label }}</label>
+        {{ form.language }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.donwload_method.label }}</label>
+        {{ form.donwload_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.initial_method.label }}</label>
+        {{ form.initial_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.license_default.label }}</label>
+        {{ form.license_default }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    <input class="button-primary" type="submit" style="width: 210px; margin-top: 10px;" value="New Package">
+  </form>
+</div>
+
+{% endblock %}
