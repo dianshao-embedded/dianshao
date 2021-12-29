@@ -43,19 +43,31 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                     bitbake_version)
     submodule.start()
 
-    while submodule.is_alive():
-        try:
-            server.settimeout(5)
-            byte, addr = server.recvfrom(1024)
-        except:
-            continue
-        gitMessage = json.loads(byte.decode('ascii'))
-        sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-        progress_send.send_progress(percentage='25',subProgress=sub, description='Add Bitbake Submodule')
+    path = os.path.join(project_path, project_name, 'bitbake')
+    i = 0
+    while(os.path.exists(path) == False and i < 3):
+        while submodule.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage='25',subProgress=sub, description='Add Bitbake Submodule')
+
+        if os.path.exists(path):
+            break
+        else:
+            i += 1
+
+    if i == 3:
+        raise Exception('git clone error')
 
     bitbake_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bitbake')
     r, err = shell.shell_cmd(command=('cp -r %s %s' % (bitbake_path, target_path)), cwd = target_path)
     if err == True:
+        server.close()
         raise Exception("project template build error: %s" % (r))
 
     progress_send.send_progress(percentage='50', description='Add Openembedded-Core Submodule')
@@ -65,20 +77,32 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                     yocto_version)
     submodule.start()
     
-    while submodule.is_alive():
-        try:
-            server.settimeout(5)
-            byte, addr = server.recvfrom(1024)
-        except:
-            continue
-        gitMessage = json.loads(byte.decode('ascii'))
-        sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-        progress_send.send_progress(percentage='50', subProgress=sub, description='Add Openembedded-Core Submodule')
-    
+    path = os.path.join(project_path, project_name, 'openembedded-core')
+    i = 0
+    while(os.path.exists(path) == False and i < 3):
+        while submodule.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage='50', subProgress=sub, description='Add Openembedded-Core Submodule')
+        
+        if os.path.exists(path):
+            break
+        else:
+            i += 1
+
+    if i == 3:
+        raise Exception('git clone error')
+
     project = Project.objects.get(id=project_id)
     MetaLayer.objects.create(project=project, 
                             name='openembedded-core', 
-                            url='https://github.com/openembedded/openembedded-core.git')
+                            url='https://github.com/openembedded/openembedded-core.git',
+                            remote_or_local = 'remote')
     
     progress_send.send_progress(percentage='75', description='Add Meta-Yocto Submodule')
 
@@ -87,33 +111,61 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                     yocto_version)
     submodule.start()
 
-    while submodule.is_alive():
-        try:
-            server.settimeout(5)
-            byte, addr = server.recvfrom(1024)
-        except:
-            continue
-        gitMessage = json.loads(byte.decode('ascii'))
-        sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-        progress_send.send_progress(percentage='75', subProgress=sub, description='Add Meta-Yocto Submodule')               
+    path = os.path.join(project_path, project_name, 'meta-yocto')
+    i = 0
+    while(os.path.exists(path) == False and i < 3):    
+
+        while submodule.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage='75', subProgress=sub, description='Add Meta-Yocto Submodule')               
+
+        if os.path.exists(path):
+            break
+        else:
+            i += 1
+
+    if i == 3:
+        raise Exception('git clone error')
 
     MetaLayer.objects.create(project=project,
                             name='meta-yocto', 
-                            url='https://git.yoctoproject.org/meta-yocto.git')
+                            url='https://git.yoctoproject.org/meta-yocto.git',
+                            remote_or_local = 'remote',
+                            sub = 'meta-poky')
+
+    MetaLayer.objects.create(project=project,
+                            name='meta-yocto', 
+                            url='https://git.yoctoproject.org/meta-yocto.git',
+                            remote_or_local = 'remote',
+                            sub = 'meta-yocto-bsp')                          
 
     ret, err = shell.shell_cmd(command=('unset BBPATH; bash -c \"source %s %s;\"' 
                                 % (os.path.join(target_path, 'oe-init-build-env'), os.path.join(target_path, 'build'))), 
                                     cwd=target_path)
     if err == True:
+        server.close()
         raise Exception("auto create configure file error: %s" % (ret))
         
     server.close()
-    # TODO: 项目完整性检查
+    
+    bb_path = os.path.join(project_path, project_name, 'bitbake')
+    oe_path = os.path.join(project_path, project_name, 'openembedded-core')
+    yocto_path = os.path.join(project_path, project_name, 'meta-yocto')
+
+    if os.path.exists(bb_path) == False or os.path.exists(oe_path) == False or os.path.exists(yocto_path) == False:
+        raise Exception('Project is not complete')
+
     return "Project Create Success"
 
 
 @shared_task(bind=True)
-def meta_clone_task(self, name, url, project_id):
+def meta_clone_task(self, name, url, remote_or_local, subd, project_id):
     # TODO: meta add sub directory, meta add without donwload
     progress_send = ProgressSend(self)
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -123,7 +175,8 @@ def meta_clone_task(self, name, url, project_id):
     project = Project.objects.get(id=project_id)
 
     for m in metas:
-        if m.name == name:
+        if m.name == name and m.sub == subd:
+            server.close()
             raise Exception("meta is already exist")
 
     progress_send.send_progress(33, description='Meta Adding...')
@@ -137,28 +190,47 @@ def meta_clone_task(self, name, url, project_id):
     elif project.project_version == 'ZEUS':
         yocto_version = 'zeus'
 
-    submodule = git.git_submodule(os.path.join(project.project_path, project.project_name),
-                    name, url, yocto_version)
-    submodule.start()
+    if remote_or_local == 'remote':
+        path = os.path.join(project.project_path, project.project_name, name)
+        i = 0
+        while(os.path.exists(path) == False and i < 3):
+            submodule = git.git_submodule(os.path.join(project.project_path, project.project_name),
+                            name, url, yocto_version)
+            submodule.start()
 
-    while submodule.is_alive():
-        try:
-            server.settimeout(5)
-            byte, addr = server.recvfrom(1024)
-        except:
-            continue
-        gitMessage = json.loads(byte.decode('ascii'))
-        sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-        progress_send.send_progress(subProgress=sub)
+            while submodule.is_alive():
+                try:
+                    server.settimeout(5)
+                    byte, addr = server.recvfrom(1024)
+                except:
+                    continue
+                gitMessage = json.loads(byte.decode('ascii'))
+                sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+                progress_send.send_progress(subProgress=sub)
+            
+            if os.path.exists(path):
+                break
+            else:
+                i += 1
+
+        if i == 3:
+            raise Exception('git clone error')
 
     progress_send.send_progress(66, description='Save Meta-Layer')
     try:
-        MetaLayer.objects.create(project=project, name=name, url=url)    
+        MetaLayer.objects.create(project=project, 
+                        name=name, url=url, remote_or_local=remote_or_local, sub=subd)    
     except:
+        server.close()
         raise Exception("meta model create err")
 
+    if subd is not '':
+        meta_name = name + '/' + subd
+    else:
+        meta_name = name
+
     bbcommand.bitbake_addlayer(os.path.join(project.project_path, project.project_name), 
-                        os.path.join(project.project_path, project.project_name, name))
+                        os.path.join(project.project_path, project.project_name, meta_name))
 
     server.close()
     return 'meta add success'
@@ -192,9 +264,23 @@ def bitbake_progress(self, project_path, project_name, target, command):
             progress_send.send_progress(subProgress=sub)
             continue
 
-        if bbprogress['event_type'] == 'CommandCompleted':
+        if bbprogress['event_type'] == 'Ping':
+            # TODO: Server Command
+            # TODO: ping interval 
+            progress_send.send_progress(description='Bitbaking...')
+
+        if bbprogress['event_type'] == 'End':
+            break
+        
+        if bbprogress['event_type'] == 'CommandFailed':
+            raise Exception('Bitbake Failed, Please Find Details in dianshao_bitbake.log')
+        
+        if bbprogress['event_type'] == 'CommandExit':
             break
 
+        if bbprogress['event_type'] == 'CommandCompleted':
+            break
+        
         if bbprogress['event_type'] == 'CacheLoadStarted':
             progress_send.send_progress(percentage=0, description='cache data load started')
 
@@ -209,7 +295,7 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
         if bbprogress['event_type'] == 'ProcessProgress':
             progress_send.send_progress(percentage=int(bbprogress['progress']), description='%s process excuting' % bbprogress['processname'])
-
+            # TODO: Add Parse Progress
         if bbprogress['event_type'] == 'ProcessFinished':
             progress_send.send_progress(percentage=100, description='%s process finished' % bbprogress['processname'])
 
@@ -223,7 +309,8 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
         # TODO: bitbake 错误处理
         if bbprogress['event_type'] == 'CommandFailed':
-            raise exception('bitbake target failed with err CommandFailed')
+            server.close()
+            raise Exception('bitbake target failed with err CommandFailed')
 
     server.close()
 

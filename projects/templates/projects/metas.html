@@ -21,7 +21,8 @@
         <tr>
           <th>Name</th>
           <th>Url</th>
-          <th></th>
+          <th>Sub</th>
+          <th>ROL</th>
         </tr>
       </thead>
       <tbody>
@@ -29,7 +30,8 @@
         <tr>
           <td>{{ meta.name }}</td>
           <td>{{ meta.url }}</td>
-          <td><a href="#" class="button">Enter</a></td>
+          <td>{{ meta.sub }}</td>
+          <td>{{ meta.remote_or_local }}</td>          
         </tr>
         {% endfor %}
       </tbody>

@@ -2,7 +2,6 @@ import sys
 import os
 import socket
 import json
-import time
 
 try:
     import bb
@@ -19,6 +18,12 @@ except RuntimeError as exc:
 import logging
 logger = logging.getLogger("DianshaoLogger")
 interactive = sys.stdout.isatty()
+
+def pluralise(singular, plural, qty):
+    if(qty == 1):
+        return singular % qty
+    else:
+        return plural % qty
 
 _evt_list = [ 
     "bb.runqueue.runQueueExitWait",
@@ -56,7 +61,7 @@ def main(server, eventHandler, params):
     print("welcom to dianshao yocto ui\n")
     dianshao_client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     dianshao_server_addr = ('127.0.0.1', 6688)
-
+    dianshao_client.settimeout(0.1)
     dianshao_client.sendto(json.dumps({'event_type': 'dianshao_ui_start'}).encode('ascii'), dianshao_server_addr)
 
     helper = uihelper.BBUIHelper()
@@ -93,10 +98,14 @@ def main(server, eventHandler, params):
     
     main.shutdown = 0
     return_value = 0
+    errors = 0
+    warnings = 0
+    taskfailures = []
     
     while True:
         try:
             event = eventHandler.waitEvent(0.5)
+
             if event is None:
                 if main.shutdown > 1:
                     break
@@ -118,7 +127,17 @@ def main(server, eventHandler, params):
                 
                 event = eventHandler.waitEvent(0.5)
                 if event is None:
-                    # TODO: add an alive signal
+                    dianshao_client.sendto(json.dumps({'event_type': 'Ping'}).encode('ascii'), dianshao_server_addr)
+                    try:
+                        msg, addr = dianshao_client.recvfrom(1024)
+                        server_command = json.loads(msg.decode('ascii'))
+                        if server_command['event_type'] == 'PONG':
+                            if server_command['command'] == 'shutdown':
+                                main.shutdown = 2
+
+                    except socket.timeout:
+                        pass
+
                     continue
 
             helper.eventHandler(event)
@@ -134,7 +153,16 @@ def main(server, eventHandler, params):
                 continue
 
             if isinstance(event, logging.LogRecord):
-                # TODO: Log recorder 处理，同上述 Log 处理为同一件事
+                # TODO: LogRecord 记录错误及返回错误仍然存在问题
+                if event.levelno >= bb.msg.BBLogFormatter.ERROR:
+                    errors = errors + 1
+                    return_value = 1
+                elif event.levelno == bb.msg.BBLogFormatter.WARNING:
+                    warnings = warnings + 1
+
+                dianshao_client.sendto(json.dumps({'event_type': 'LogRecord',
+                                                'msg': event.msg}).encode('ascii'), dianshao_server_addr)
+
                 logging.getLogger(event.name).handle(event)
                 continue
 
@@ -189,20 +217,26 @@ def main(server, eventHandler, params):
                 continue
 
             if isinstance(event, bb.command.CommandFailed):
+                dianshao_client.sendto(json.dumps({'event_type': 'CommandFailed'
+                                                }).encode('ascii'), dianshao_server_addr)
                 return_value = event.exitcode
                 if event.error:
                     errors = errors + 1
                     logger.error(str(event))
+                main.shutdown = 2
                 continue
 
             if isinstance(event, bb.command.CommandExit):
                 if not return_value:
                     return_value = event.exitcode
+                dianshao_client.sendto(json.dumps({'event_type': 'CommandExit'
+                                            }).encode('ascii'), dianshao_server_addr)  
                 main.shutdown = 2
                 continue
 
             if isinstance(event, (bb.command.CommandCompleted, bb.cooker.CookerExit)):
-                dianshao_client.sendto(json.dumps({'event_type': 'CommandCompleted'}).encode('ascii'), dianshao_server_addr)
+                dianshao_client.sendto(json.dumps({'event_type': 'CommandCompleted'
+                                            }).encode('ascii'), dianshao_server_addr)                
                 main.shutdown = 2
                 continue
 
@@ -231,6 +265,7 @@ def main(server, eventHandler, params):
             if isinstance(event, bb.runqueue.runQueueTaskFailed):
                 return_value = 1
                 logger.error(str(event))
+                taskfailures.append(event.taskstring)
                 dianshao_client.sendto(json.dumps({'event_type': 'runQueueTaskFailed',
                                                 'taskstring': event.taskstring}).encode('ascii'), dianshao_server_addr)
                 continue
@@ -287,33 +322,6 @@ def main(server, eventHandler, params):
             if not params.observe_only:
                 _, error = server.runCommand(["stateForceShutdown"])
             main.shutdown = 2
-        except KeyboardInterrupt:
-            if params.observe_only:
-                print("\nKeyboard Interrupt, exiting observer...")
-                main.shutdown = 2
-
-            def state_force_shutdown():
-                print("\nSecond Keyboard Interrupt, stopping...\n")
-                _, error = server.runCommand(["stateForceShutdown"])
-                if error:
-                    logger.error("Unable to cleanly stop: %s" % error)
-
-            if not params.observe_only and main.shutdown == 1:
-                state_force_shutdown()
-
-            if not params.observe_only and main.shutdown == 0:
-                print("\nKeyboard Interrupt, closing down...\n")
-                interrupted = True
-                # Capture the second KeyboardInterrupt during stateShutdown is running
-                try:
-                    _, error = server.runCommand(["stateShutdown"])
-                    if error:
-                        logger.error("Unable to cleanly shutdown: %s" % error)
-                except KeyboardInterrupt:
-                    state_force_shutdown()
-
-            main.shutdown = main.shutdown + 1
-            pass
         except Exception as e:
             import traceback
             sys.stderr.write(traceback.format_exc())
@@ -322,7 +330,26 @@ def main(server, eventHandler, params):
             main.shutdown = 2
             return_value = 1 
 
-        logging.shutdown()
-        print('dianshao out')
-        dianshao_client.close()
-        return return_value                       
+    summary = ""
+
+    if taskfailures:
+        summary += pluralise("\nSummary: %s task failed:",
+                                "\nSummary: %s tasks failed:", len(taskfailures))
+        for failure in taskfailures:
+            summary += "\n  %s" % failure
+    if warnings:
+        summary += pluralise("\nSummary: There was %s WARNING message shown.",
+                                "\nSummary: There were %s WARNING messages shown.", warnings)
+    if return_value and errors:
+        summary += pluralise("\nSummary: There was %s ERROR message shown, returning a non-zero exit code.",
+                                "\nSummary: There were %s ERROR messages shown, returning a non-zero exit code.", errors)
+    
+    """
+    dianshao_client.sendto(json.dumps({'event_type': 'Summary',
+                                'summary': summary, 'total_error': errors, 'total_warning': warnings, 
+                                'total_task_failures': len(taskfailures)}).encode('ascii'), dianshao_server_addr)
+    """
+    logging.shutdown()
+    print('dianshao out')
+    dianshao_client.close()
+    return return_value                       

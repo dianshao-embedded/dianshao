@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="three columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.base.label }}</label>
+        {{ form.base }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.initial_method.label }}</label>
+        {{ form.initial_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.flash.label }}</label>
+        {{ form.flash }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="two columns">
+        <label>{{ form.distro_version.label }}</label>
+        {{ form.distro_version }}
+      </div>
+      <div class="ten columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    <input class="button-primary" type="submit" style="width: 210px; margin-top: 10px;" value="New Machine">
+  </form>
+</div>
+
+{% endblock %}

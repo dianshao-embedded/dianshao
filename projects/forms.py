@@ -1,9 +1,6 @@
-from sys import path
-from typing_extensions import Required
 from django import forms
-from django.db.models import fields
-from django.forms import widgets
-from .models import ExtraMarco, Project, MetaLayer, Build, MyConf, MyPackages, Tasks, LocalFile
+from .models import *
+from django.contrib.postgres.forms import SimpleArrayField
 
 class ProjectModelForm(forms.ModelForm):
 
@@ -26,19 +23,30 @@ class ProjectModelForm(forms.ModelForm):
 
 class MetaModelForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.Meta.not_required:
+            self.fields[field].required = False
+
     class Meta:
 
         model = MetaLayer
-        fields = ['url', 'name']
+        fields = ['url', 'name', 'remote_or_local', 'sub']
+
+        not_required = ['url', 'sub']
 
         widgets = {
             'url': forms.TextInput(attrs={'class': 'u-full-width'}),
             'name': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'meta-xx'}),
+            'remote_or_local': forms.Select(attrs={'class': 'u-full-width'}),
+            'sub': forms.TextInput(attrs={'class': 'u-full-width'}),
         }
 
         labels = {
             'name': 'Name',
             'url': 'Url',
+            'remote_or_local': 'Remote or Local',
         }
 
 class BuildModelForm(forms.ModelForm):
@@ -154,12 +162,13 @@ class ExtraMarcoModelForm(forms.ModelForm):
     class Meta:
 
         model = ExtraMarco
-        fields = ['name', 'value', 'description']
+        fields = ['name', 'value', 'description', 'strength']
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'u-full-width'}),
             'value': forms.TextInput(attrs={'class': 'u-full-width'}), 
             'description': forms.TextInput(attrs={'class': 'u-full-width'}), 
+            'strength': forms.Select(attrs={'class': 'u-full-width'})
         }
 
 class LocalFileModelForm(forms.ModelForm):
@@ -189,10 +198,140 @@ class GeneratePatchFileForm(forms.Form):
     path = forms.CharField(max_length=300,
                     widget=forms.TextInput(attrs={'class': 'u-full-width'}),
                     label='File Path in Original Project')
-    old = forms.CharField(max_length=3000, 
+    old = forms.CharField(max_length=30000, 
                     widget=forms.Textarea(attrs={'class': 'u-full-width', "style":"height: 300px;"}),
                     label='Old Content')
-    new = forms.CharField(max_length=3000, 
+    new = forms.CharField(max_length=30000, 
                     widget=forms.Textarea(attrs={'class': 'u-full-width', "style":"height: 300px;"}),
                     label='New Content')
 
+class MyMachineModelForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.Meta.not_required:
+            self.fields[field].required = False
+                    
+
+    class Meta:
+
+        model = MyMachine
+        fields = ['name', 'description', 'base', 'uboot', 'kernel', 'flash', 
+                'filesystem', 'initial_method', 'jffs2_eraseblock', 'mkubifs_args',
+                'ubinize_args', 'mxsboot_nand_args', 'machine_include', 'distro_include',
+                'kernel_dts', 'uboot_defconfig', 'kernel_defconfig', 'machineoverrides',
+                'distro_version']
+
+        not_required = ('uboot', 'kernel', 'flash', 'filesystem', 'jffs2_eraseblock', 
+                 'mkubifs_args', 'ubinize_args', 'mxsboot_nand_args', 'machine_include',
+                'distro_include', 'kernel_dts', 'uboot_defconfig', 'kernel_defconfig', 
+                'machineoverrides')
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'description': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'base': forms.Select(attrs={'class': 'u-full-width'}),
+            'uboot': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'flash': forms.Select(attrs={'class': 'u-full-width'}),
+            'filesystem': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'initial_method': forms.Select(attrs={'class': 'u-full-width'}),
+            'jffs2_eraseblock': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'mkubifs_args': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'ubinize_args': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'mxsboot_nand_args': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'machine_include': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'distro_include': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel_dts': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'uboot_defconfig': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel_defconfig': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'machineoverrides': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'distro_version': forms.TextInput(attrs={'class': 'u-full-width'}),
+        }
+
+        labels = {
+            'base': 'Chip & Board',
+            'initial_method': 'Systemd or System-V',
+            'donwload_method': 'Download Method',
+            'machine_include': 'Machine File Include',
+            'distro_include': 'Distro File Include',
+            'kernel_dts': 'Kernel DeviceTree',
+            'machineoverrides': 'MACHINEOVERRIDES',
+            'distro_version': 'Distro Version',
+        }
+
+
+class ExtraMachineMarcoModelForm(forms.ModelForm):
+
+    class Meta:
+
+        model = MachineExtraMarco
+        fields = ['name', 'value', 'description', 'strength']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'value': forms.TextInput(attrs={'class': 'u-full-width'}), 
+            'description': forms.TextInput(attrs={'class': 'u-full-width'}), 
+            'strength': forms.Select(attrs={'class': 'u-full-width'}),            
+        }
+
+
+class MyImageModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.Meta.not_required:
+            self.fields[field].required = False
+    
+    class Meta:
+
+        model = MyImage
+        fields = ['name', 'base', 'flash', 'description', 'wic_file', 'uboot_name',
+                'uboot_start', 'uboot_end', 'kernel_name', 'kernel_start', 'kernel_end',
+                'fs_name', 'fs_start', 'fs_end']
+
+        not_required = ['wic_file' ,'uboot_name', 'uboot_start', 'uboot_end',
+                    'kernel_name', 'kernel_start', 'kernel_end', 'fs_name', 'fs_start', 'fs_end']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'description': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'base': forms.Select(attrs={'class': 'u-full-width'}),
+            'flash': forms.Select(attrs={'class': 'u-full-width'}),
+            'wic_file': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'uboot_name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'uboot_start': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'uboot_end': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel_name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel_start': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'kernel_end': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'fs_name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'fs_start': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'fs_end': forms.TextInput(attrs={'class': 'u-full-width'}),
+        }
+
+class MyImagePackageModelForm(forms.ModelForm):
+
+    class Meta:
+
+        model = MyImagePackage
+        fields = ['name', 'description', 'version']
+
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'description': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'version': forms.TextInput(attrs={'class': 'u-full-width'}),
+        }
+
+class MyConfForm(forms.Form):
+    machine = forms.CharField(max_length=60, 
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    distro = forms.CharField(max_length=300,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    parallel_make = forms.CharField(max_length=100,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}),
+                    label='Make Parallel Number')
+    max_parallel_threads = forms.CharField(max_length=100, 
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}),
+                    label='Max Parallel Tasks Number')

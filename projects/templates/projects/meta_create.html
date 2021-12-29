@@ -14,6 +14,16 @@
           {{ form.url }}
         </div>
       </div>
+      <div class="row">
+        <div class="four columns">
+          <label>{{ form.remote_or_local.label }}</label>
+          {{ form.remote_or_local }}
+        </div>
+        <div class="eight columns">
+          <label>{{ form.sub.label }}</label>
+          {{ form.sub }}
+        </div>
+      </div>
       <input class="button-primary" type="submit" style="width: 210px; margin-top: 10px;" value="Add Meta Layer">
     </form>
   </div>

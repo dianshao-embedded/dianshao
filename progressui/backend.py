@@ -35,6 +35,8 @@ class ProgressSend():
 
         return state, meta
 
+# TODO: Add Failure message set
+
 class ProgressReceive():
     
     def __init__(self, result):
@@ -53,6 +55,11 @@ class ProgressReceive():
         elif state == 'SUCCESS':
             data = {
                 'state': state,
+                'completed': True,
+            }
+        elif state == 'FAILURE':
+            data = {
+                'state': 'FAILURE',
                 'completed': True,
             }
         

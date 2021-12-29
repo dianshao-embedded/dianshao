@@ -99,6 +99,13 @@
         {{ form.building_directory }}
       </div>
     </div>
+    {% else %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.depends.label }}</label>
+        {{ form.depends }}
+      </div>
+    </div>
     {% endif %}
     {% if form.initial_method.value == 'Systemd' %}
     <div class="row">

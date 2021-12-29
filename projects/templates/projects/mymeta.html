@@ -7,7 +7,38 @@
         <h5> My Machine </h5>
       </div>  
       <div class="three columns">
-        <a href="{% url 'projects:mypackage_create' project_id %}" class="button"> New Machine </a>
+        <a href="{% url 'projects:mymachine_create' project_id %}" class="button"> New Machine </a>
+      </div>  
+    </div>
+    <table style="width: 960px; margin-top: 0px;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Chip</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mymachine in mymachines %}
+        <tr>
+          <td>{{ mymachine.name }}</td>
+          <td>{{ mymachine.description }}</td>
+          <td>{{ mymachine.base }}</td>
+          <td>
+            <a href="{% url 'projects:mymachine_detail' project_id mymachine.id %}" class="button">Details</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class='row' style="margin-top: 60px;">
+      <div class="three columns">
+        <h5> Update Local Conf </h5>
+      </div>  
+      <div class="three columns">
+        <a href="{% url 'projects:myconf_update' project_id %}" class="button"> Update Conf </a>
       </div>  
     </div>
 
@@ -36,7 +67,6 @@
           <td>{{ mypackage.version }}</td>
           <td>
             <a href="{% url 'projects:mypackage_detail' project_id mypackage.id %}" class="button">Details</a>
-            <a href="#" class="button">Delete</a>
           </td>
         </tr>
         {% endfor %}
@@ -48,8 +78,31 @@
         <h5> My Image </h5>
       </div>  
       <div class="three columns">
-        <a href="{% url 'projects:mypackage_create' project_id %}" class="button"> New Image </a>
+        <a href="{% url 'projects:myimage_create' project_id %}" class="button"> New Image </a>
       </div>  
     </div>
+
+    <table style="width: 960px; margin-top: 0px;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Base</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for myimage in myimages %}
+        <tr>
+          <td>{{ myimage.name }}</td>
+          <td>{{ myimage.description }}</td>
+          <td>{{ myimage.base }}</td>
+          <td>
+            <a href="{% url 'projects:myimage_detail' project_id myimage.id %}" class="button">Details</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 {% endblock %}

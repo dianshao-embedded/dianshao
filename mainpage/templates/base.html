@@ -35,6 +35,9 @@
       <ul>
         <a href="/">MainPage</a>
         <a href="/projects/">Projects</a>
+        {% if project_id %}
+        <a href="{% url 'projects:mymeta' project_id %}">MyMeta</a>
+        {% endif %}
         <a href="#help">Help</a>
         <a href="#about">about</a>
       </ul>

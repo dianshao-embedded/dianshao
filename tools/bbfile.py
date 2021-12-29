@@ -1,6 +1,6 @@
 import os
 from tools.shell import shell_cmd
-from projects.models import ExtraMarco, LocalFile, MyPackages, Tasks
+from projects.models import *
 
 class DianshaoBBFile():
     def __init__(self, name, version, type):
@@ -124,7 +124,14 @@ class DianshaoBBFile():
             f.write('export GOCACHE = "${WORKDIR}/go/cache"\n')
 
         for em in extraMarco:
-            f.write('%s = %s\n' % (em.name, em.value))
+            if em.strength == 'normal':
+                f.write('%s = %s\n' % (em.name, em.value))
+            elif em.strength == 'weak':
+                f.write('%s ?= %s\n' % (em.name, em.value))
+            elif em.strength == 'very weak':
+                f.write('%s ??= %s\n' % (em.name, em.value))
+            elif em.strength == 'append':
+                f.write('%s += %s\n' % (em.name, em.value))                    
 
         do_configure_prepend = []
         do_configure = []
@@ -225,3 +232,185 @@ class DianshaoBBFile():
     def create_local_file(self, name, content):
         f = open(os.path.join(self.files_path, name), "w")
         f.write(content)
+        f.close()
+
+
+class DianshaoMachineFile():
+    
+    def __init__(self, machine_id):
+        self.machine = MyMachine.objects.get(id=machine_id)
+        pass
+
+    def create_machine_file(self):
+        machine_path = os.path.join(self.machine.project.project_path, 
+                    self.machine.project.project_name, 
+                    'meta/conf/machine', self.machine.name+'.conf')
+        if os.path.exists(machine_path):
+            os.remove(machine_path)
+
+        extraMarco = MachineExtraMarco.objects.filter(machine__id=self.machine.id)
+
+        f = open(machine_path, 'w')
+        f.write('# %s-%s\n' % (self.machine.name, self.machine.description))
+        f.write('# Auto Generate by Dianshao\n')
+
+        for i in self.machine.machine_include:
+            f.write('include %s\n' % i)
+        if self.machine.base == 'imx6ull':
+            f.write('MACHINEOVERRIDES =. "mx6:mx6ull:"\n')
+            f.write('ACCEPT_FSL_EULA = "1"\n')
+            f.write('UBOOT_SUFFIX = "imx"\n')
+            f.write('UBOOT_MAKE_TARGET = "u-boot.imx"\n')
+            if self.machine.flash == 'Spi-Nor':
+                f.write('UBOOT_CONFIG = "qspi1"\n')
+                f.write('UBOOT_CONFIG[qspi1] = "%s"\n' % self.machine.uboot_defconfig)
+            elif self.machine.flash == 'Rawnand':
+                f.write('UBOOT_CONFIG = "nand"\n')
+                f.write('UBOOT_CONFIG[nand] = "%s,ubifs"\n' % self.machine.uboot_defconfig)
+            elif self.machine.flash == 'EMMC':
+                f.write('UBOOT_CONFIG = "emmc"\n')
+                f.write('UBOOT_CONFIG[emmc] = "%s,sdcard"\n' % self.machine.uboot_defconfig)
+            elif self.machine.flash == 'SDCard':
+                f.write('UBOOT_CONFIG = "sd"\n')
+                f.write('UBOOT_CONFIG[sd] = "%s,sdcard"\n' % self.machine.uboot_defconfig)
+        else:
+            if self.machine.machineoverrides is not '':
+                f.write('MACHINEOVERRIDES =. "%s"\n' % self.machine.machineoverrides)
+            if self.machine.uboot_defconfig is not '':
+                f.write('UBOOT_MACHINE = "%s"\n' % self.machine.uboot_defconfig)
+
+        if self.machine.uboot is not '':
+            f.write('PREFERRED_PROVIDER_virtual/bootloader = "%s"\n' % self.machine.uboot)
+            f.write('PREFERRED_PROVIDER_u-boot = "%s"\n' % self.machine.uboot)
+
+        if self.machine.kernel is not '':
+            f.write('PREFERRED_PROVIDER_virtual/kernel = "%s"\n' % self.machine.kernel)
+
+        if self.machine.kernel_defconfig is not '':
+            f.write('KBUILD_DEFCONFIG = "%s"\n' % self.machine.kernel_defconfig)
+    
+        if self.machine.kernel_dts is not '':
+            f.write('KERNEL_DEVICETREE = "%s"\n' % self.machine.kernel_dts)
+
+        f.write('IMAGE_FSTYPES += "%s"\n' % self.machine.filesystem)
+
+        if self.machine.jffs2_eraseblock is not '':
+            f.write('JFFS2_ERASEBLOCK = "%s"\n' % self.machine.jffs2_eraseblock)
+        
+        if self.machine.mkubifs_args is not '':
+            f.write('MKUBIFS_ARGS = "%s"\n' % self.machine.mkubifs_args)
+        if self.machine.ubinize_args is not '':
+            f.write('UBINIZE_ARGS = "%s"\n' % self.machine.ubinize_args)
+        if self.machine.mxsboot_nand_args is not '':
+            f.write('MXSBOOT_NAND_ARGS = "%s"\n' % self.machine.mxsboot_nand_args)
+        for em in extraMarco:
+            if em.strength == 'normal':
+                f.write('%s = %s\n' % (em.name, em.value))
+            elif em.strength == 'weak':
+                f.write('%s ?= %s\n' % (em.name, em.value))
+            elif em.strength == 'very weak':
+                f.write('%s ??= %s\n' % (em.name, em.value))
+            elif em.strength == 'append':
+                f.write('%s += %s\n' % (em.name, em.value))
+
+        f.close()   
+
+    def create_distro_file(self):
+        distro_path = os.path.join(self.machine.project.project_path, 
+            self.machine.project.project_name, 
+            'meta/conf/distro', self.machine.name+'.conf')
+        if os.path.exists(distro_path):
+            os.remove(distro_path)
+
+        f = open(distro_path, 'w')
+        f.write('# %s-%s\n' % (self.machine.name, self.machine.description))
+        f.write('# Auto Generate by Dianshao\n')
+
+        for i in self.machine.distro_include:
+            f.write('include %s\n' % i)
+
+        f.write('DISTRO = "%s"\n' % self.machine.name)
+        f.write('DISTRO_NAME = "%s"\n' % self.machine.description)
+        # TODO: add distro version
+        f.write('DISTRO_VERSION = "1.0.0"\n')
+
+        if self.machine.initial_method == 'Systemd':
+            f.write('DISTRO_FEATURES_append = " systemd"\n')
+            f.write('VIRTUAL-RUNTIME_init_manager = "systemd"\n')
+
+        f.close()
+
+
+class DianshaoImageFile():
+    def __init__(self, image_id):
+        self.image = MyImage.objects.get(id=image_id)
+
+    def create_image_file(self):
+        image_path = os.path.join(self.image.project.project_path, 
+                    self.image.project.project_name, 
+                    'meta/recipes-core/images', self.image.name+'.bb')
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+        packages = MyImagePackage.objects.filter(image__id=self.image.id)
+
+        f = open(image_path, 'w')
+        f.write('# %s-%s\n' % (self.image.name, self.image.description))
+        f.write('# Auto Generate by Dianshao\n') 
+
+        if self.image.base == 'poky-minimal':
+            f.write('require recipes-core/images/core-image-minimal.bb\n')
+        elif self.image.base == 'poky-base':
+            f.write('require recipes-core/images/core-image-base.bb\n')
+
+        f.write('inherit extrausers\n')
+        f.write('EXTRA_USERS_PARAMS = "usermod -P root root;"\n')
+
+        for package in packages:
+            f.write('IMAGE_INSTALL += "%s"\n', package.name)
+
+        f.close()
+
+
+class DianshaoConfFile():
+    def __init__(self, project_id):
+        self.project = Project.objects.get(id=project_id)
+
+    def set_config_file(self, machine, distro, pm, pt):
+        build_conf_path = os.path.join(self.project.project_path, 
+            self.project.project_name, 'build/conf/local.conf')
+
+        if os.path.exists(build_conf_path):
+            content = open(build_conf_path, 'r')
+            lines = content.readlines()
+            lines[0] = ('DISTRO = "%s"\n' % distro)
+            lines[1] = ('MACHINE = "%s"\n' % machine)
+            for i in range(len(lines)):
+                if lines[i].startswith('BB_NUMBER_THREADS') == True:
+                    lines[i] = ('BB_NUMBER_THREADS = "%s"\n' % pt)
+                elif lines[i].startswith('PARALLEL_MAKE') == True:
+                    lines[i] = ('PARALLEL_MAKE = "-j %s"\n' % pm)
+
+            content = open(build_conf_path, 'w')
+            content.writelines(lines)
+            content.close()
+
+        sample_conf_path = os.path.join(self.project.project_path, 
+            self.project.project_name, 'meta/conf/local.conf.sample')
+
+        if os.path.exists(sample_conf_path):
+            content = open(sample_conf_path, 'r')
+            lines = content.readlines()
+            lines[0] = ('DISTRO = "%s"\n' % distro)
+            lines[1] = ('MACHINE = "%s"\n' % machine)
+            
+            for i in range(len(lines)):
+                if lines[i].startswith('BB_NUMBER_THREADS') == True:
+                    lines[i] = ('BB_NUMBER_THREADS = "%s"\n' % pt)
+                elif lines[i].startswith('PARALLEL_MAKE') == True:
+                    lines[i] = ('PARALLEL_MAKE = "-j %s"\n' % pm)
+
+            content = open(sample_conf_path, 'w')
+            content.writelines(lines)
+            content.close()
+        

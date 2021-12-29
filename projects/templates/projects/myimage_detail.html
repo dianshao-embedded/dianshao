@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="four columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}   
+      </div>
+      <div class="four columns">
+        <label>{{ form.base.label }}</label>
+        {{ form.base }}   
+      </div>
+      <div class="four columns">
+        <label>{{ form.flash.label }}</label>
+        {{ form.flash }}
+      </div>       
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    {% if form.flash.value == 'SDCard' %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.wic_file.label }}</label>
+        {{ form.wic_file }}
+      </div>
+    </div>
+    {% endif %}
+    <input class="button" type="submit" style="width: 210px; margin-top: 10px;" value="Update Image">
+  </form>
+</div>
+
+<div class="container", style="margin-top: 50px">
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Version</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for package in packages %}
+      <tr>
+        <td>{{ package.name }}</td>
+        <td>{{ package.description }}</td>
+        <td>{{ package.version }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class='row'>
+    <div class="three columns">
+    <a href="{% url 'projects:package_import' project_id myimage_id %}" class="button" style="width: 200px;"> Import Package </a>
+    </div>
+  </div>
+  <br>
+  <form action="{% url 'projects:myimage_file' project_id myimage_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 400px; margin-top: 10px;" value="Bitbake Image!!">
+  </form>
+</div>
+
+{% endblock %}

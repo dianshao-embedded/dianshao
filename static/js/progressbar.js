@@ -18,6 +18,11 @@ class ProgressUI {
         barElement.style.width = percentage + "%";
         barTextElement.textContent = description + " " + percentage + "%";
     }
+    
+    onError(barElement, barTextElement) {
+        barElement.style.backgroundColor = '#dc4f63'
+        barTextElement.textContent = 'Task Failed'
+    }
 
     success(percentage, description, barElement, barTextElement) {
         barElement.style.width = percentage + "%";
@@ -40,7 +45,11 @@ class ProgressUI {
             this.onRefreshView(data.subProgress)
             this.onProgress(data.percentage, data.description, this.mainBarElement, this.mainBarTextElement)
         } else if (data.state == 'SUCCESS') {
+            console.log('Task SUCCESS')
             this.success(100, "success", this.mainBarElement, this.mainBarTextElement)
+        } else if (data.state == 'FAILURE') {
+            console.log('Task Failure')
+            this.onError(this.mainBarElement, this.mainBarTextElement)
         }
     }
 

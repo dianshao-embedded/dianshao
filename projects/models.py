@@ -1,6 +1,6 @@
-from os import path
+from django import VERSION
 from django.db import models
-from django.db.models.base import Model
+from django.contrib.postgres.fields import ArrayField
 
 # Create your models here.
 
@@ -19,9 +19,16 @@ class Project(models.Model):
 
 
 class MetaLayer(models.Model):
+    REMOTE_OR_LOCAL = [
+        ('local', 'local'),
+        ('remote', 'remote'),
+    ]
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     url = models.CharField(max_length=200)
+    remote_or_local = models.CharField(max_length=60, choices=REMOTE_OR_LOCAL)
     name = models.CharField(max_length=100)
+    sub = models.CharField(max_length=100)
 
 class Build(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -51,7 +58,6 @@ class MyConf(models.Model):
                         choices=VALUE_SETTING_STRENGTH_LEVEL)
     
 class MyPackages(models.Model):
-    # TODO: 将数据库修改为pgsql，使用其数组功能
     FILE_TYPE = [
         ('bbappend', 'bbappend'),
         ('bb', 'bb'),
@@ -70,7 +76,7 @@ class MyPackages(models.Model):
 
     INITIAL_METHOD = [
         ('Systemd', 'Systemd'),
-        ('System-V', 'System-V')
+        # TODO: ('System-V', 'System-V')
     ]
 
     LICENSE_DEFAULT = [
@@ -145,6 +151,107 @@ class ExtraMarco(models.Model):
     value = models.CharField(max_length=300)
     description = models.CharField(max_length=300)
 
+    VALUE_SETTING_STRENGTH_LEVEL = [
+        ('normal', 'normal'),
+        ('weak', 'weak'),
+        ('very weak', 'very weak'),
+        ('append', 'append'),
+    ]
+    strength = models.CharField(max_length=100, 
+                        choices=VALUE_SETTING_STRENGTH_LEVEL)
+
+class MyMachine(models.Model):
+    BASE = [
+        ('imx6ull', 'imx6ull'),
+        ('none', 'None'),
+    ]
+
+    INITIAL_METHOD = [
+        ('Systemd', 'Systemd'),
+        # TODO: ('System-V', 'System-V')
+    ]
+
+    FLASH = [
+        ('Spi-Nor', 'Spi-Nor'),
+        ('Rawnand', 'Rawnand'),
+        #('EMMC', 'EMMC'),
+        ('SDCard', 'SDCard'),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    description = models.CharField(max_length=300)
+    base = models.CharField(max_length=60, choices=BASE)
+    machineoverrides = models.CharField(max_length=60)
+    # TODO: Add MACHINEOVERRIDES (后续要提供选项，通过BASE)
+    # TODO: Add DEFAULTTUNE
+    uboot = models.CharField(max_length=60)
+    uboot_defconfig = models.CharField(max_length=120)
+    kernel = models.CharField(max_length=60)
+    kernel_defconfig = models.CharField(max_length=120)
+    flash = models.CharField(max_length=60, choices=FLASH) # TODO：在view中根据芯片和板子选型动态加载选项
+    filesystem = models.CharField(max_length=60)
+    initial_method = models.CharField(max_length=30, choices=INITIAL_METHOD)
+    jffs2_eraseblock = models.CharField(max_length=30)
+    mkubifs_args = models.CharField(max_length=120)
+    ubinize_args = models.CharField(max_length=120)
+    mxsboot_nand_args = models.CharField(max_length=120)
+    machine_include = ArrayField(models.CharField(max_length=60, blank=True))
+    distro_include = ArrayField(models.CharField(max_length=60, blank=True))
+    distro_version = models.CharField(max_length=60)
+    kernel_dts = models.CharField(max_length=120)
+    pass
+
+class MachineExtraMarco(models.Model):
+    machine = models.ForeignKey(MyMachine, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    value = models.CharField(max_length=300)
+    description = models.CharField(max_length=300)
+
+    VALUE_SETTING_STRENGTH_LEVEL = [
+        ('normal', 'normal'),
+        ('weak', 'weak'),
+        ('very weak', 'very weak'),
+        ('append', 'append'),
+    ]
+    strength = models.CharField(max_length=100, 
+                        choices=VALUE_SETTING_STRENGTH_LEVEL)
+
+class MyImage(models.Model):
+    IMAGE_BASE = [
+        ('poky-minimal', 'poky-minimal'),
+        ('poky-base', 'poky-base')
+    ]
+
+    FLASH = [
+        ('Spi-Nor', 'Spi-Nor'),
+        ('Rawnand', 'Rawnand'),
+        #('EMMC', 'EMMC'),
+        ('SDCard', 'SDCard'),
+    ]
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    base = models.CharField(max_length=60, choices=IMAGE_BASE)
+    description = models.CharField(max_length=300)
+    flash = models.CharField(max_length=60, choices=FLASH)
+    wic_file = models.CharField(max_length=120)
+    uboot_name = models.CharField(max_length=30)
+    uboot_start = models.CharField(max_length=30)
+    uboot_end = models.CharField(max_length=30)
+    kernel_name = models.CharField(max_length=30)
+    kernel_start = models.CharField(max_length=30)
+    kernel_end = models.CharField(max_length=30)
+    fs_name = models.CharField(max_length=30)
+    fs_start = models.CharField(max_length=30)
+    fs_end = models.CharField(max_length=30)
+
+class MyImagePackage(models.Model):
+    image = models.ForeignKey(MyImage, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    description = models.CharField(max_length=60)
+    version = models.CharField(max_length=60)
+    
 # TODO：my machine 需要根据使用的芯片来确定，这部分放到后面去做，先选择使用的芯片厂家，然后生成需要配置的宏
 # 或者直接改成 my-uboot 和 my-kernel，根据 boot 和 kernel 的bbfile直接生成相应的宏
 # 第一步还是将其作为文件系统制作工具，machine直接采用支持包做好的形式来，后续不断增加支持的芯片，可以根据芯片去灵活修改就行了

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 50px">
+  <h5> MyMachine Settings </h5>
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="three columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.base.label }}</label>
+        {{ form.base }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.initial_method.label }}</label>
+        {{ form.initial_method }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.flash.label }}</label>
+        {{ form.flash }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="two columns">
+        <label>{{ form.distro_version.label }}</label>
+        {{ form.distro_version }}
+      </div>
+      <div class="ten columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.uboot.label }}</label>
+        {{ form.uboot }}
+      </div>
+      <div class="six columns">
+        <label>{{ form.uboot_defconfig.label }}</label>
+        {{ form.uboot_defconfig }}
+      </div>
+    </div>
+    <div class="row">  
+      <div class="six columns">
+        <label>{{ form.kernel.label }}</label>
+        {{ form.kernel }}
+      </div>
+      <div class="six columns">
+        <label>{{ form.kernel_dts.label }}</label>
+        {{ form.kernel_dts }}
+      </div>
+    </div>
+    <div class="row">
+      {% if form.base.value == "none" %}
+      <div class="six columns">
+        <label>{{ form.machineoverrides.label }}</label>
+        {{ form.machineoverrides }}
+      </div>
+      {% endif %}      
+    </div>
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.filesystem.label }}</label>
+        {{ form.filesystem }}
+      </div>
+      {% if form.filesystem.value == "jffs2" %}
+      <div class="six columns">
+        <label>{{ form.jffs2_eraseblock.label }}</label>
+        {{ form.jffs2_eraseblock }}        
+      </div>
+      {% elif form.filesystem.value == "ubifs" %}
+      <div class="six columns">
+        <label>{{ form.mkubifs_args.label }}</label>
+        {{ form.mkubifs_args }}        
+      </div>
+    </div>
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.ubinize_args.label }}</label>
+        {{ form.ubinize_args }}        
+      </div>    
+      <div class="six columns">
+        <label>{{ form.mxsboot_nand_args.label }}</label>
+        {{ form.mxsboot_nand_args }}        
+      </div>
+      {% endif %}
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.machine_include.label }}</label>
+        {{ form.machine_include }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.distro_include.label }}</label>
+        {{ form.distro_include }}
+      </div>      
+    </div>
+    <input class="button" type="submit" style="width: 200px; margin-top: 10px;" value="Update Machine">
+  </form>
+</div>
+
+<div class="container", style="margin-top: 50px">
+  <table class="u-full-width">
+    <thead>
+      <tr>
+        <th>Extra Marco</th>
+        <th>Value</th>
+        <th>Description</th>
+        <th>strength</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for extraMarco in extraMarcos %}
+      <tr>
+        <td>{{ extraMarco.name }}</td>
+        <td>{{ extraMarco.value }}</td>
+        <td>{{ extraMarco.description }}</td>
+        <td>{{ extraMarco.strength }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class='row'>
+    <div class="three columns">
+    <a href="{% url 'projects:extra_machine_marco_create' project_id mymachine_id %}" class="button" style="width: 200px;"> Add Extra Marco </a>
+    </div>
+  </div>
+  <br>
+  <form action="{% url 'projects:mymachine_file' project_id mymachine_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 400px; margin-top: 10px;" value="Generate Machine & Distro File">
+  </form>
+</div>
+
+{% endblock %}

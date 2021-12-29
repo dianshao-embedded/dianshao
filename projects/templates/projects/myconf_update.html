@@ -1,24 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
 
-  <div class="container", style="margin-top: 100px">
-    <form action="" method="post">
-      {% csrf_token %}
-      <div class="row">
-        <div class="three columns">
-          <label>{{ form.name.label }}</label>
-          {{ form.name }}
-        </div>
-        <div class="six columns">
-          <label>{{ form.value.label }}</label>
-          {{ form.value }}
-        </div>
-        <div class="three columns">
-          <label>{{ form.strength.label }}</label>
-          {{ form.strength }}
-        </div>
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.machine.label }}</label>
+        {{ form.machine }}
       </div>
-      <input class="button-primary" type="submit" style="width: 210px; margin-top: 10px;" value="Add Marco Setting">
-    </form>
-  </div>
+      <div class="six columns">
+        <label>{{ form.distro.label }}</label>
+        {{ form.distro }}
+      </div>      
+    </div>
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.max_parallel_threads.label }}</label>
+        {{ form.max_parallel_threads }}
+      </div>
+      <div class="six columns">
+        <label>{{ form.parallel_make.label }}</label>
+        {{ form.parallel_make }}
+      </div>      
+    </div>
+    <input class="button" type="submit" style="width: 210px; margin-top: 10px;" value="Update Image">
+  </form>
+</div>
+
 {% endblock %}
