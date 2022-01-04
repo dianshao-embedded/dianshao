@@ -1,11 +1,10 @@
-from logging import exception
 import os
 import socket
 import json
 from celery import shared_task
 from progressui.backend import ProgressSend
 from git.repo.base import Repo
-from tools import shell, git, bbcommand
+from tools import shell, git, bbcommand, patch, bbfile
 from .models import MetaLayer, Project
 
 # TODO：后续提高稳定性，无论如何误操作可自恢复
@@ -270,7 +269,12 @@ def bitbake_progress(self, project_path, project_name, target, command):
             progress_send.send_progress(description='Bitbaking...')
 
         if bbprogress['event_type'] == 'End':
-            break
+            if bbprogress['total_error'] > 0:
+                raise Exception('Bitbake Failed, With %s errors' % bbprogress['total_error'])
+            elif bbprogress['total_task_failures'] > 0:
+                raise Exception('Bitbake Failed, With %s errors' % bbprogress['total_task_failures'])
+            else:
+                return ('Bitbake Success with %s Warnings' % bbprogress['total_warning'])
         
         if bbprogress['event_type'] == 'CommandFailed':
             raise Exception('Bitbake Failed, Please Find Details in dianshao_bitbake.log')
@@ -316,4 +320,50 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
     return 'bitbake target success'
 
-    
+@shared_task(bind=True)
+def bbfile_task_create(self, name, version, type, project_path, mypackage_id):
+    bb = bbfile.DianshaoBBFile(name, version, type)
+    bb.create_folder(project_path)
+    bb.create_bbfile(mypackage_id)
+
+
+@shared_task(bind=True)
+def bbfile_localfile_import_task(self, name, version, type, project_path, file_name, file_path):
+    bb = bbfile.DianshaoBBFile(name, version, type)
+    bb.create_folder(project_path)
+    bb.create_local_file(file_path, file_name)
+
+
+@shared_task(bind=True)
+def bbfile_localfile_create_task(self, name, version, type, project_path, file_name, content):
+    bb = bbfile.DianshaoBBFile(name, version, type)
+    bb.create_folder(project_path)
+    bb.create_local_file(file_name, content)
+
+@shared_task(bind=True)
+def machinefile_create_task(self, mymachine_id):
+    machine_file = bbfile.DianshaoMachineFile(mymachine_id)
+    machine_file.create_machine_file()
+    machine_file.create_distro_file()
+
+@shared_task(bind=True)
+def imagefile_create_task(self, myimage_id):
+    imagefile = bbfile.DianshaoImageFile(myimage_id)
+    imagefile.create_image_file()
+
+@shared_task(bind=True)
+def config_set_task(self, project_id, machine, distro, pm, pt):
+    conf = bbfile.DianshaoConfFile(project_id)
+    conf.set_config_file(machine, distro, pm, pt)
+
+@shared_task(bind=True)
+def patch_generator_task(self, name, file_path, project_path, package_name, 
+        package_version, package_type, text1, text2):
+    patch.patch_generator(name, file_path, project_path, package_name, 
+        package_version, package_type, text1, text2)
+
+@shared_task(bind=True)
+def shell_cmd_task(self, cmd, cwd):
+    ret, error = shell.shell_cmd(command=cmd, cwd=cwd)
+    if error:
+        raise Exception(ret)

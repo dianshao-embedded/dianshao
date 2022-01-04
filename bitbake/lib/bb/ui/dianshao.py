@@ -11,9 +11,12 @@ try:
     import bb.cooker
     import bb.exceptions
     import bb.runqueue
+    import bb.msg
     from bb.ui import uihelper
 except RuntimeError as exc:
     sys.exit(str(exc))
+
+featureSet = [bb.cooker.CookerFeatures.SEND_SANITYEVENTS]
 
 import logging
 logger = logging.getLogger("DianshaoLogger")
@@ -153,15 +156,17 @@ def main(server, eventHandler, params):
                 continue
 
             if isinstance(event, logging.LogRecord):
-                # TODO: LogRecord 记录错误及返回错误仍然存在问题
-                if event.levelno >= bb.msg.BBLogFormatter.ERROR:
+                if event.levelno >= logging.ERROR:
+                    print('lxy')
                     errors = errors + 1
                     return_value = 1
-                elif event.levelno == bb.msg.BBLogFormatter.WARNING:
+                elif event.levelno == logging.WARNING:
                     warnings = warnings + 1
 
+                """
                 dianshao_client.sendto(json.dumps({'event_type': 'LogRecord',
                                                 'msg': event.msg}).encode('ascii'), dianshao_server_addr)
+                """
 
                 logging.getLogger(event.name).handle(event)
                 continue
@@ -217,8 +222,10 @@ def main(server, eventHandler, params):
                 continue
 
             if isinstance(event, bb.command.CommandFailed):
+                """
                 dianshao_client.sendto(json.dumps({'event_type': 'CommandFailed'
                                                 }).encode('ascii'), dianshao_server_addr)
+                """
                 return_value = event.exitcode
                 if event.error:
                     errors = errors + 1
@@ -229,14 +236,18 @@ def main(server, eventHandler, params):
             if isinstance(event, bb.command.CommandExit):
                 if not return_value:
                     return_value = event.exitcode
+                """
                 dianshao_client.sendto(json.dumps({'event_type': 'CommandExit'
                                             }).encode('ascii'), dianshao_server_addr)  
+                """
                 main.shutdown = 2
                 continue
 
             if isinstance(event, (bb.command.CommandCompleted, bb.cooker.CookerExit)):
+                """
                 dianshao_client.sendto(json.dumps({'event_type': 'CommandCompleted'
                                             }).encode('ascii'), dianshao_server_addr)                
+                """
                 main.shutdown = 2
                 continue
 
@@ -343,7 +354,10 @@ def main(server, eventHandler, params):
     if return_value and errors:
         summary += pluralise("\nSummary: There was %s ERROR message shown, returning a non-zero exit code.",
                                 "\nSummary: There were %s ERROR messages shown, returning a non-zero exit code.", errors)
-    
+
+
+    dianshao_client.sendto(json.dumps({'event_type': 'End', 'total_error': errors,
+                                    'total_warning': warnings, 'total_task_failures': len(taskfailures)}).encode('ascii'), dianshao_server_addr)
     """
     dianshao_client.sendto(json.dumps({'event_type': 'Summary',
                                 'summary': summary, 'total_error': errors, 'total_warning': warnings, 
@@ -352,4 +366,4 @@ def main(server, eventHandler, params):
     logging.shutdown()
     print('dianshao out')
     dianshao_client.close()
-    return return_value                       
+    return return_value

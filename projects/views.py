@@ -1,13 +1,8 @@
-from typing import ContextManager
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from tools.shell import shell_cmd
-from tools.bbfile import DianshaoBBFile, DianshaoConfFile, DianshaoImageFile, DianshaoMachineFile
-from tools.patch import patch_generator
 from .models import *
 from .forms import *
-from .tasks import project_initial_task, meta_clone_task
-from .tasks import bitbake_progress
+from .tasks import *
 from os import path
 # Create your views here.
 
@@ -20,9 +15,13 @@ def project(request):
         if form.is_valid():
             project = form.save()
             #TODO: 创建基础项目并显示进度
-            ret, error = shell_cmd("mkdir %s/%s" % (project.project_path, project.project_name), project.project_path)
-            if error:
-                raise Exception(ret)
+            result = shell_cmd_task.delay("mkdir %s/%s" % (project.project_path, project.project_name), project.project_path)
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
+
         return redirect(reverse('projects:initial', args=(project.id,)))
 
     context = {
@@ -42,10 +41,13 @@ def project_initial(request, project_id):
 def project_delete(request, project_id):
     if request.method == 'POST':
         project = Project.objects.get(id=project_id)
-        ret, err = shell_cmd('rm -rf %s' % 
+        result = shell_cmd_task.delay('rm -rf %s' % 
                     (path.join(project.project_path, project.project_name)), project.project_path)
-        if err:
-            raise Exception(ret)
+        while 1:
+            if (result._get_task_meta())["status"] == 'FAILURE':
+                raise Exception('shell command task error')
+            elif (result._get_task_meta())["status"] == 'SUCCESS':
+                break
 
         project.delete()
 
@@ -213,9 +215,16 @@ def file_create(request, project_id, mypackage_id):
         form = LocalFileModelForm(request.POST)
         if form.is_valid():
             form_obj = form.save(commit=False)
-            bbfile = DianshaoBBFile(mypackage.name, mypackage.version, mypackage.type)
-            bbfile.create_folder(path.join(project.project_path, project.project_name))
-            bbfile.create_local_file(form.cleaned_data['name'], form.cleaned_data['content'])
+            result = bbfile_localfile_create_task.delay(mypackage.name, mypackage.version, mypackage.type,
+                            path.join(project.project_path, project.project_name),
+                            form.cleaned_data['name'], form.cleaned_data['content'])
+
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
+            
             form_obj.package = mypackage
             form_obj.type = 'New File'
             form_obj.content = 'Do not SAVE file content!'
@@ -240,9 +249,16 @@ def file_import(request, project_id, mypackage_id):
         form = LocalFileModelForm(request.POST)
         if form.is_valid():
             form_obj = form.save(commit=False)
-            bbfile = DianshaoBBFile(mypackage.name, mypackage.version, mypackage.type)
-            bbfile.create_folder(path.join(project.project_path, project.project_name))
-            bbfile.import_local_file(form.cleaned_data['path'], form.cleaned_data['name'])
+            result = bbfile_localfile_create_task.delay(mypackage.name, mypackage.version, mypackage.type,
+                            path.join(project.project_path, project.project_name),
+                            form.cleaned_data['path'], form.cleaned_data['name'])
+
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
+
             form_obj.package = mypackage
             form_obj.type = 'Import File'
             form_obj.save()
@@ -264,10 +280,16 @@ def file_generate_patch(request, project_id, mypackage_id):
     if request.method == 'POST':
         form = GeneratePatchFileForm(request.POST)
         if form.is_valid():
-            patch_generator(form.cleaned_data['name'], form.cleaned_data['path'],
+            result = patch_generator_task.delay(form.cleaned_data['name'], form.cleaned_data['path'],
                                 path.join(project.project_path, project.project_name),
                                 mypackage.name, mypackage.version, mypackage.type,
                                 form.cleaned_data['old'], form.cleaned_data['new'])
+
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
 
             LocalFile.objects.create(package=mypackage, name=form.cleaned_data['name'] + '.patch',
                                     type = 'patch')                    
@@ -278,9 +300,16 @@ def file_generate_patch(request, project_id, mypackage_id):
 def mypackage_bbfile(request, project_id, mypackage_id):
     project = Project.objects.get(id=project_id)
     mypackage = MyPackages.objects.get(id=mypackage_id)
-    bbfile = DianshaoBBFile(mypackage.name, mypackage.version, mypackage.type)
-    bbfile.create_folder(path.join(project.project_path, project.project_name))
-    bbfile.create_bbfile(mypackage_id)
+    result = bbfile_task_create.delay(mypackage.name, mypackage.version, mypackage.type,
+                        path.join(project.project_path, project.project_name),
+                        mypackage_id)
+
+    while 1:
+        if (result._get_task_meta())["status"] == 'FAILURE':
+            raise Exception('shell command task error')
+        elif (result._get_task_meta())["status"] == 'SUCCESS':
+            break
+
     return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id))) 
 
 def mypackage_bitbake(request, project_id, mypackage_id):
@@ -369,10 +398,12 @@ def extra_machine_marco_create(request, project_id, mymachine_id):
 
 def mymachine_file(request, project_id, mymachine_id):
     project = Project.objects.get(id=project_id)
-    machine_file = DianshaoMachineFile(mymachine_id)
-    machine_file.create_machine_file()
-    machine_file.create_distro_file()
-    #machine_file.set_config_file()
+    result = machinefile_create_task.delay(mymachine_id)
+    while 1:
+        if (result._get_task_meta())["status"] == 'FAILURE':
+            raise Exception('shell command task error')
+        elif (result._get_task_meta())["status"] == 'SUCCESS':
+            break
     return redirect(reverse('projects:mymachine_detail', args=(project_id, mymachine_id))) 
 
 
@@ -437,8 +468,13 @@ def myimagepackage_create(request, project_id, myimage_id):
     return render(request, 'projects/package_import.html', context)
 
 def myimage_file(request, project_id, myimage_id):
-    imagefile = DianshaoImageFile(myimage_id)
-    imagefile.create_image_file()
+    result = imagefile_create_task.delay(myimage_id)
+    while 1:
+        if (result._get_task_meta())["status"] == 'FAILURE':
+            raise Exception('shell command task error')
+        elif (result._get_task_meta())["status"] == 'SUCCESS':
+            break
+
     project = Project.objects.get(id=project_id)
     myimage = MyImage.objects.get(id=myimage_id)
 
@@ -465,11 +501,16 @@ def myconf_update(request, project_id):
     if request.method == 'POST':
         form = MyConfForm(request.POST)
         if form.is_valid():
-            conf = DianshaoConfFile(project_id)
-            conf.set_config_file(form.cleaned_data['machine'],
+            result = config_set_task.delay(project_id,
+                                form.cleaned_data['machine'],
                                 form.cleaned_data['distro'],
                                 form.cleaned_data['parallel_make'],
                                 form.cleaned_data['max_parallel_threads'])
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
 
         return redirect(reverse('projects:mymeta', args=(project_id,)))    
     

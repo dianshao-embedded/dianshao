@@ -20,6 +20,7 @@ class ProgressUI {
     }
     
     onError(barElement, barTextElement) {
+        barElement.style.width = '100%'
         barElement.style.backgroundColor = '#dc4f63'
         barTextElement.textContent = 'Task Failed'
     }
