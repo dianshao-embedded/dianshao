@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container", style="margin-top: 100px">
+    <form action="" method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="eight columns">
+          <label>{{ form.project_name.label }}</label>
+          {{ form.project_name }}
+        </div>
+        <div class="four columns">
+          <label>{{ form.project_version.label }}</label>
+          {{ form.project_version }}
+        </div>
+      </div>
+      <input class="button-primary" type="submit" style="width: 210px; margin-top: 10px;" value="New Project">
+    </form>
+  </div>
+
+  <div class="container", style="margin-top: 50px">
+    <table class="u-full-width">
+      <thead>
+        <tr>
+          <th>Project Name</th>
+          <th>Yocto Version</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td>{{ project.project_name }}</td>
+          <td>{{ project.project_version }}</td>
+          <td><a href="{% url 'projects:metas' project.id %}" class="button">Enter</a></td>
+          <form action="{% url 'projects:project_delete' project.id %}" method="POST">
+            {% csrf_token %}
+            <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

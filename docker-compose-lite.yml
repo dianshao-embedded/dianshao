@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/files/django/Dockerfile_with_Mirror
+    image: dianshao-web:latest
+    network_mode: host
+    container_name: dianshao-web
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+
+  yocto:
+    build:
+      context: .
+      dockerfile: docker/files/yocto_celery/Dockerfile_with_Mirror
+    image: dianshao-yocto:latest
+    command: celery -A dianshao worker --loglevel=info --concurrency=1
+    network_mode: host
+    container_name: dianshao-yocto
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    volumes:
+      - ~/.dianshao:/app/yocto

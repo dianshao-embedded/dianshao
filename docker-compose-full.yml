@@ -1,0 +1,67 @@
+version: "3"
+
+volumes:
+  postgres: {}
+  redis: {}
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/files/django/Dockerfile_with_Mirror
+    image: dianshao-web:latest
+    container_name: dianshao-web
+    command: python manage.py runserver 0:8000
+    depends_on:
+      - postgres
+      - redis
+    expose:
+      - "8866"
+      - "6688"
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.envs/.django
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    networks: 
+      - bridge_network
+
+  postgres:
+    image: "postgres:12-alpine"
+    env_file:
+      - ./.envs/.postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    networks: 
+      - bridge_network
+
+  redis:
+    image: redis:6.2.6-alpine
+    volumes:
+      - redis:/data
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    networks: 
+      - bridge_network
+
+  yocto:
+    build:
+      context: .
+      dockerfile: docker/files/yocto_celery/Dockerfile_with_Mirror
+    image: dianshao-yocto:latest
+    command: celery -A dianshao worker --loglevel=info --concurrency=1
+    expose:
+      - "8866"
+      - "6688"
+    env_file:
+      - ./.envs/.yocto_celery
+    container_name: dianshao-yocto
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    volumes:
+      - ~/.dianshao:/app/yocto
+    networks: 
+      - bridge_network
+
+networks:
+  bridge_network:
+    driver: bridge

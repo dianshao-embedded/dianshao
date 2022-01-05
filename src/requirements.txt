@@ -1,0 +1,7 @@
+celery==5.1.2
+django==2.2
+psycopg2==2.8.6
+redis==4.0.2
+amqp==5.0.9
+GitPython==3.1.18
+gitdb==4.0.9
