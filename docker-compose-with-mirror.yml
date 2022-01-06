@@ -11,7 +11,6 @@ services:
       dockerfile: docker/files/django/Dockerfile_with_Mirror
     image: dianshao-web:latest
     container_name: dianshao-web
-    command: python manage.py runserver 0:8000
     depends_on:
       - postgres
       - redis

@@ -8,19 +8,19 @@ WORKDIR /app/web
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-
 # install psycopg2 dependencies
 RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
+    && apk add postgresql-dev gcc python3-dev musl-dev git
 
 # install dependencies
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip
+RUN pip install --upgrade pip
 COPY ./src/requirements.txt .
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+RUN pip install -r requirements.txt
 
 # copy project
-COPY ./src .
+COPY --chown=root:root ./src .
+
+RUN chmod +x /app/web/scripts/web_entry.sh
 
 # CMD will run when this dockerfile is running
-CMD ["sh", "-c", "python manage.py migrate;"]
+ENTRYPOINT ["/app/web/scripts/web_entry.sh"]

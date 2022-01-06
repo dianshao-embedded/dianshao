@@ -8,10 +8,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: docker/files/django/Dockerfile_with_Mirror
+      dockerfile: docker/files/django/Dockerfile
     image: dianshao-web:latest
     container_name: dianshao-web
-    command: python manage.py runserver 0:8000
     depends_on:
       - postgres
       - redis
@@ -47,7 +46,7 @@ services:
   yocto:
     build:
       context: .
-      dockerfile: docker/files/yocto_celery/Dockerfile_with_Mirror
+      dockerfile: docker/files/yocto_celery/Dockerfile
     image: dianshao-yocto:latest
     command: celery -A dianshao worker --loglevel=info --concurrency=1
     expose:
@@ -58,7 +57,7 @@ services:
     container_name: dianshao-yocto
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     volumes:
-      - ~/.dianshao_full:/app/yocto
+      - ~/.dianshao:/app/yocto
     networks: 
       - bridge_network
 

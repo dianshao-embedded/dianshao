@@ -51,3 +51,8 @@
     2. meta-layer 子文件夹添加
     3. meta-layer 增加错误处理
     4. 本地项目导入
+
+TODO: add mirror docker file using instruction
+Windows 上使用需要打开 区分大小写属性
+fsutil.exe file setCaseSensitiveInfo .\.dianshao\ enable
+使用时需要创建文件夹，linux需要设置权限，windows上需要打开大小写属性区分
