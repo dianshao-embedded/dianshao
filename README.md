@@ -183,6 +183,12 @@ If you are familiar with yocto, you will master dianshao quickly. If you are a b
     ![after-addlayer-screenshot]
 
 
+3. Test bitbake
+
+    You can bitbake anything in *bitbake command* page, you can use this page to test how to operate bitbake. The current UI is not good enough, I will continue to optimize it
+
+    ![bitbake-test-screenshot]
+
 
 ### Develope MyMeta
 
@@ -280,3 +286,4 @@ The dianshao is mainly used to help you use yocto, so you need to know the basic
 [success-initial-screenshot]: images/success_init.png
 [addlayer-screenshot]: images/addlayer.png
 [after-addlayer-screenshot]: images/after_addlayer.png
+[bitbake-test-screenshot]: images/bitbake_test.png
