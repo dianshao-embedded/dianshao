@@ -64,7 +64,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![Product Name Screen Shot][product-screenshot]
+![product-screenshot]
 
 The Dianshao is an embedded linux project build and compile tool, it is developed based on [Bitbake](https://github.com/openembedded/bitbake) and [Yocto](https://www.yoctoproject.org/) project. It can lower the threshold of using Bitbake and provide an interactive web UI to enhance the experience of using Bitbake
 
@@ -101,37 +101,43 @@ For reliable and rapid deployment, Dianshao and related dependencies run in the 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Since the program runs in a docker container, installation is very easy
+Since the program runs in a docker container, installation is pretty easy
 
 ### Prerequisites
 
 Currently, the Dinashao has been tested on windows (Win11) and linux (Ubuntu & Fedora & centos) host. You can choose you preferred operating system as the docker host
 
-Please Install docker & docker-compose according to the official documentation
+Please Install docker & docker-compose on your host according to the official documentation
 
 [docker install doc](https://docs.docker.com/engine/install/)
 
 [docker-compose install doc](dochttps://docs.docker.com/compose/install/)
 
-***notes:*** If you use dianshao on windows, please create a "/.dianshao" folder in your home path (C:\Users\username) and turn on folder **case sensitive** properity using the following command before installation
-
-```sh
-fsutil.exe file setCaseSensitiveInfo .\.dianshao\ enable
-```
 
 ### Installation
 
 1. Clone the repo
+    
+    *Using on Linux*
    ```sh
-   git clone https://github.com/croakexciting/dianshao.git
+   $ git clone https://github.com/croakexciting/dianshao.git && cd ./dianshao
    ```
+
+    *Using on Windows*
+
+    ```sh
+    $ git clone https://github.com/croakexciting/dianshao.git -c core.autocrlf=false && cd ./dianshao
+
+    $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
+    ```
+
 2. Docker Image build
    ```sh
-   sudo docker-compose build
+   $ sudo docker-compose build
    ```
 3. Docker Container up
    ```sh
-   sudo docker-compose up
+   $ sudo docker-compose up
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -141,13 +147,67 @@ fsutil.exe file setCaseSensitiveInfo .\.dianshao\ enable
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+In general, the dianshao is an extension of Bitbake, which aims to help developers to develop yocto projects more conveniently.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+If you are familiar with yocto, you will master dianshao quickly. If you are a beginner, it doesn’t matter, Dianshao will help you quickly understand and learn to develop yocto projects
 
+### Basic Usage
+
+1. Create a new yocto project
+
+    Enter your project name and version, then click button
+
+    ![create-project-screenshot]
+
+
+    Wait for the project initialization to complete, it may take some time
+
+    ![project-initial-screenshot]
+
+
+    If the initialization is successful, the page is as follow
+      ![success-initial-screenshot]
+
+2. Add other layers you need
+
+    The initialized project only contains the core layer, if you need to add other layers, please click *Add Therd-Party MetaLayer* button
+
+    Enter the layer name and choose the import method, the remote means that the git repo does not exist in the main directory, and the local means the opposite. If you choose *remote*, you need to input layer url. the *sub* means that the layer you want to import is located in a subdirectory of a git repo, such as **meta-openembedded/meta-oe/**.
+
+
+    ![addlayer-screenshot]
+
+    
+    Wait for the process to complete,  and you will find the layer now is in the list
+
+    ![after-addlayer-screenshot]
+
+
+
+### Develope MyMeta
+
+Danshao provides a range of tools to help you develop your own embedded projects, including customizing your device, your images, and packages that you develop yourself or want to introduce additionally
+
+Danshao achieves the above functions by helping you to automatically generate yocto bbfiles, machine, distro and imagefiles. See the documentation (coming soon) for specific instructions
+
+
+
+### Open your yocto project in IDE
+
+The yocto project generate by dianshao is located at ./your_project, you can open the yocto project in IDE as normal
+
+
+### Development in the command line
+
+If you want to execute the bitbake command directly using the command line, Please use the following command to enter inside the container, and then use the command line
+
+  ```sh
+  $ docker exec -it dianshao-yocto bash
+  ```
+
+<!-- TODO: doc!!!! _For more examples, please refer to the [Documentation](https://example.com)_ -->
+ 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- ROADMAP -->
 ## Roadmap
@@ -215,3 +275,8 @@ The dianshao is mainly used to help you use yocto, so you need to know the basic
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [product-screenshot]: images/mainpage.png
+[create-project-screenshot]: images/create_project.png
+[project-initial-screenshot]: images/project_initial.png
+[success-initial-screenshot]: images/success_init.png
+[addlayer-screenshot]: images/addlayer.png
+[after-addlayer-screenshot]: images/after_addlayer.png
