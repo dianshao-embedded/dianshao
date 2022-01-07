@@ -203,6 +203,7 @@ If you want to execute the bitbake command directly using the command line, Plea
 
   ```sh
   $ docker exec -it dianshao-yocto bash
+  $ cd ../yocto
   ```
 
 <!-- TODO: doc!!!! _For more examples, please refer to the [Documentation](https://example.com)_ -->
