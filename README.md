@@ -274,7 +274,7 @@ The dianshao is mainly used to help you use yocto, so you need to know the basic
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[product-screenshot]: images/mainpage.png
+[product-screenshot]: images/mainpage.PNG
 [create-project-screenshot]: images/create_project.png
 [project-initial-screenshot]: images/project_initial.png
 [success-initial-screenshot]: images/success_init.png
