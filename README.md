@@ -8,24 +8,6 @@
 -->
 
 
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -98,9 +80,9 @@ Here is why:
 
 ### Built With
 
-Dianshao is mainly based on Django framework, it operates bitbake through asynchronous task queue supported by Celery + Redis and uses Postgresql as database.
+Dianshao is mainly developed based on Django framework, it operates bitbake through asynchronous task queue supported by Celery + Redis and uses Postgresql as database.
 
-For reliable and rapid deployment, Dianshao and related dependencies is run in the docker containers
+For reliable and rapid deployment, Dianshao and related dependencies run in the docker containers
 
 * [Bitbake](https://github.com/openembedded/bitbake)
 * [Yocto](https://www.yoctoproject.org/)
@@ -123,25 +105,33 @@ Since the program runs in a docker container, installation is very easy
 
 ### Prerequisites
 
+Currently, the Dinashao has been tested on windows (Win11) and linux (Ubuntu & Fedora & centos) host. You can choose you preferred operating system as the docker host
+
 Please Install docker & docker-compose according to the official documentation
 
 [docker install doc](https://docs.docker.com/engine/install/)
 
 [docker-compose install doc](dochttps://docs.docker.com/compose/install/)
 
+***notes:*** If you use dianshao on windows, please create a "/.dianshao" folder in your home path (C:\Users\username) and turn on folder **case sensitive** properity using the following command before installation
+
+```sh
+fsutil.exe file setCaseSensitiveInfo .\.dianshao\ enable
+```
+
 ### Installation
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   git clone https://github.com/croakexciting/dianshao.git
    ```
-2. Install NPM packages
+2. Docker Image build
    ```sh
-   npm install
+   sudo docker-compose build
    ```
-3. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+3. Docker Container up
+   ```sh
+   sudo docker-compose up
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -162,15 +152,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+- [ ] Bitbake progress ui optimization
+- [ ] Git clone task restart after failed
+- [ ] MyImage 
+    - [ ] Image build tools
+    - [ ] Image OTA support
+- [ ] MyPakcage
+    - [ ] System-V support
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -197,7 +186,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -206,9 +195,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+croakexciting - croakexciting@gmail.com
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -217,16 +204,9 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+The dianshao is mainly used to help you use yocto, so you need to know the basics of yocto
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
+* [yocto official documentation](https://docs.yoctoproject.org/current/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -234,16 +214,4 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/mainpage.png
