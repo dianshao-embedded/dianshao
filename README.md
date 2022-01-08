@@ -20,6 +20,10 @@
   <p align="center">
     An Embedded Linux Project Build and Compile Tool
   </p>
+
+  <p align="center">
+    <a href="https://github.com/croakexciting/dianshao/blob/main/README-CN.md">中文说明</a>
+  </p>
 </div>
 
 <br/>
@@ -117,10 +121,16 @@ Please Install docker & docker-compose on your host according to the official do
    $ git clone https://github.com/croakexciting/dianshao.git && cd ./dianshao
    ```
 
+   *notes：Because bitbake can't use by root, please don't use dianshao in root. And make sure the folder permissions is 1000:1000*
+
     *Using on Windows*
 
     ```sh
-    $ git clone https://github.com/croakexciting/dianshao.git -c core.autocrlf=false && cd ./dianshao
+    $ git clone https://github.com/croakexciting/dianshao.git -c core.autocrlf=false
+    
+    $ cd ./dianshao
+
+    $ rm .\yocto_projects\.gitkeep
 
     $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
     ```
@@ -145,7 +155,7 @@ In general, the dianshao is an extension of Bitbake, which aims to help develope
 
 If you are familiar with yocto, you will master dianshao quickly. If you are a beginner, it doesn’t matter, Dianshao will help you quickly understand and learn to develop yocto projects
 
-### Basic Usage
+### Quick Start
 
 1. Create a new yocto project
 
@@ -184,7 +194,7 @@ If you are familiar with yocto, you will master dianshao quickly. If you are a b
     ![bitbake-test-screenshot]
 
 
-### Develope MyMeta
+### Develop MyMeta
 
 Danshao provides a range of tools to help you develop your own embedded projects, including customizing your device, your images, and packages that you develop yourself or want to introduce additionally
 
@@ -194,7 +204,7 @@ Danshao achieves the above functions by helping you to automatically generate yo
 
 ### Open your yocto project in IDE
 
-The yocto project generate by dianshao is located at ./your_project, you can open the yocto project in IDE as normal
+The yocto project generate by dianshao is located at ./yocto_project, you can open the yocto project in IDE as normal
 
 
 ### Development in the command line
@@ -282,3 +292,4 @@ The dianshao is mainly used to help you use yocto, so you need to know the basic
 [addlayer-screenshot]: images/addlayer.png
 [after-addlayer-screenshot]: images/after_addlayer.png
 [bitbake-test-screenshot]: images/bitbake_test.png
+[readme-chinese]:README-CN.md
