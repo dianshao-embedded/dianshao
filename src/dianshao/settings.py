@@ -91,11 +91,6 @@ DATABASES = {
         'PASSWORD': os.environ.get("DB_PASSWORD"),
         'HOST': os.environ.get("DB_HOST"),
         'PORT': os.environ.get("DB_PORT"),
-        #'NAME': 'dianshao_docker',
-        #'USER': 'dianshao',
-        #'PASSWORD': 'dianshao',
-        #'HOST': '127.0.0.1',
-        #'PORT': '5432',
     }
 }
 
@@ -145,8 +140,5 @@ STATICFILES_DIRS = (
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 # Celery Settings
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-
-#CELERY_BROKER_URL = 'redis://localhost:6379'
-#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = os.environ.get("REDIS_URL")
+CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL")

@@ -27,10 +27,10 @@ class BitbakeThread(Thread):
             return ret
 
 def bitbake_addlayer(project_path, path):
-    env = os.path.join(project_path, 'oe-init-build-env')
-    builddir = os.path.join(project_path, 'build')
-    addlayer = os.path.join(project_path, 'bitbake/bin/bitbake-layers')
-    ret, err = shell.shell_cmd(command=('unset BBPATH; bash -c "source %s %s; %s add-layer %s"' % (env, builddir, addlayer, path)), cwd=builddir)
+    ret, err = shell.shell_cmd(command=('unset BBPATH; bash -c "source %s %s; %s add-layer %s"' 
+                        % (os.path.join(project_path, 'oe-init-build-env'), 
+                        os.path.join(project_path, 'build'), 
+                        os.path.join(project_path, 'bitbake/bin/bitbake-layers'), path)), cwd=project_path)
     if err == True:
         raise Exception('bitbake error %s' % ret)
     else:

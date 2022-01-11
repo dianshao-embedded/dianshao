@@ -103,13 +103,13 @@ Since the program runs in a docker container, installation is pretty easy
 
 ### Prerequisites
 
-Currently, the Dinashao has been tested on windows (Win11) and linux (Ubuntu & Fedora & centos) host. You can choose you preferred operating system as the docker host
+Currently, the Dinashao has been tested on windows (Win10 & Win11) and linux (Ubuntu & Fedora & centos) host. You can choose you preferred operating system as the docker host
 
 Please Install docker & docker-compose on your host according to the official documentation
 
 [docker install doc](https://docs.docker.com/engine/install/)
 
-[docker-compose install doc](dochttps://docs.docker.com/compose/install/)
+[docker-compose install doc](https://docs.docker.com/compose/install/)
 
 
 ### Installation
@@ -119,6 +119,8 @@ Please Install docker & docker-compose on your host according to the official do
     *Using on Linux*
    ```sh
    $ git clone https://github.com/croakexciting/dianshao.git && cd ./dianshao
+
+   $ sudo chown -R 1000:1000 ./yocto_projects
    ```
 
    *notes：Because bitbake can't use by root, please don't use dianshao in root. And make sure the folder permissions is 1000:1000*

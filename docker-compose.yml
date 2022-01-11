@@ -57,7 +57,7 @@ services:
     container_name: dianshao-yocto
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     volumes:
-      - ./yocto_projects:/app/yocto
+      - D:\18.dianshao_test:/app/yocto
     networks: 
       - bridge_network
 

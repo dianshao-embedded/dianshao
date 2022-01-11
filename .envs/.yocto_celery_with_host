@@ -1,7 +1,7 @@
-DB_HOST=postgres
+DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_PASSWORD=dianshao
 DB_USER=dianshao
 DB_NAME=dianshao
 
-REDIS_URL=redis://redis:6379/0
+REDIS_URL=redis://localhost:6379
