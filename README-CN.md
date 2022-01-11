@@ -105,7 +105,7 @@
 
 [docker 安装说明](https://docs.docker.com/engine/install/)
 
-[docker-compose 安装说明](dochttps://docs.docker.com/compose/install/)
+[docker-compose 安装说明](https://docs.docker.com/compose/install/)
 
 
 ### 安装
@@ -212,11 +212,7 @@ If you are familiar with yocto, you will master dianshao quickly. If you are a b
 
 ### 开发 MyMeta
 
-Danshao provides a range of tools to help you develop your own embedded projects, including customizing your device, your images, and packages that you develop yourself or want to introduce additionally
-
 颠勺提供一系列工具帮助你开发自己的 Yocto 项目，包括定制你的设备，你的镜像和你自己开发或者想额外引入的软件包
-
-Danshao achieves the above functions by helping you to automatically generate yocto bbfiles, machine, distro and imagefiles. See the documentation (coming soon) for specific instructions
 
 颠勺通过自动生成 Yocto bbfiles, machine, distro 和 imagefiles 来实现上述功能，具体请见文档说明（即将上线）
 
