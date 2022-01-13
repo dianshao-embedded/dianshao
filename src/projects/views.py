@@ -1,4 +1,5 @@
 from django.shortcuts import redirect, render
+from django.template import context
 from django.urls import reverse
 from .models import *
 from .forms import *
@@ -9,6 +10,7 @@ from os import path
 def project(request):
     projects =  Project.objects.all()
     form = ProjectModelForm()
+    form_import = ProjectImportForm()
 
     if request.method == 'POST':
         form = ProjectModelForm(request.POST)
@@ -28,6 +30,7 @@ def project(request):
     context = {
         'projects': projects,
         'form': form,
+        'form_import': form_import,
     }
 
     return render(request, 'projects/projects.html', context)
@@ -38,6 +41,17 @@ def project_initial(request, project_id):
                                         project.project_version, project.project_name)
     return render(request, 'projects/project_initial.html', 
                 context={'task_id': result.task_id, 'project_id': project_id})
+
+def project_import(request):
+    if request.method == 'POST':
+        form = ProjectImportForm(request.POST)
+        if form.is_valid():
+            result = project_import_task.delay('/app/yocto',
+                                            form.cleaned_data['name'],
+                                            form.cleaned_data['url'])
+                                        
+            return render(request, 'projects/project_import.html', context={'task_id': result.task_id})
+
 
 def project_delete(request, project_id):
     if request.method == 'POST':
@@ -82,6 +96,10 @@ def meta_create(request, project_id):
     else:
         return render(request, 'projects/meta_create.html', context={'form': form})
 
+def project_export(request, project_id):
+    result = project_export_task.delay(project_id)
+    return render(request, 'projects/project_export.html', context={'task_id': result.task_id})
+    
 
 def bitbake(request, project_id):
     # TODO: 决定还是不开发bitbake自由编译权限，只提供myMeta 菜单编译， uboot 编译， 内核编译和全项目编译
@@ -105,7 +123,6 @@ def bitbake(request, project_id):
 
 
 def mymeta(request, project_id):
-    # TODO: mymeta add mymachine and myimage
     mypackages = MyPackages.objects.filter(project__id=project_id)
     mymachines = MyMachine.objects.filter(project__id=project_id)
     myimages = MyImage.objects.filter(project__id=project_id)
@@ -119,6 +136,26 @@ def mymeta(request, project_id):
 
     return render(request, 'projects/mymeta.html', context)
 
+def mypackages(request, project_id):
+    mypackages = MyPackages.objects.filter(project__id=project_id)
+
+    context = {
+        'project_id': project_id,
+        'mypackages': mypackages,
+    }
+
+    return render(request, 'projects/mypackages.html', context)
+
+def myimages(request, project_id):
+    myimages = MyImage.objects.filter(project__id=project_id)
+
+    context = {
+        'project_id': project_id,
+        'myimages': myimages,
+    }
+
+    return render(request, 'projects/myimages.html', context)
+
 def mypackage_create(request, project_id):
     form = MyPackagesModelForm()
     if request.method == 'POST':
@@ -128,7 +165,7 @@ def mypackage_create(request, project_id):
             form_obj.project = Project.objects.get(id=project_id)
             form_obj.save()
         
-        return redirect(reverse('projects:mymeta', args=(project_id,)))
+        return redirect(reverse('projects:mypackages', args=(project_id,)))
             
     return render(request, 'projects/mypackage_create.html', context={'form': form, 'project_id': project_id})
 
@@ -352,18 +389,18 @@ def mymachine_create(request, project_id):
                 context={'form': form, 'project_id': project_id})
 
 
-def mymachine_detail(request, project_id, mymachine_id):
+def mymachine(request, project_id):
     project = Project.objects.get(id=project_id)
-    mymachine = MyMachine.objects.get(id=mymachine_id)
+    mymachine = MyMachine.objects.get(project__id=project_id)
     form = MyMachineModelForm(instance=mymachine)
 
-    extraMarcos = MachineExtraMarco.objects.filter(machine__id = mymachine_id).order_by('id')
+    extraMarcos = MachineExtraMarco.objects.filter(machine__id = mymachine.id).order_by('id')
 
     context={
         'form': form,
         'extraMarcos': extraMarcos,
         'project_id': project_id,
-        'mymachine_id': mymachine_id,
+        'mymachine_id': mymachine.id,
     }
 
     if request.method == 'POST':
@@ -371,13 +408,14 @@ def mymachine_detail(request, project_id, mymachine_id):
         if form.is_valid():
             form_obj = form.save(commit=False)
             form_obj.project = project
-            form_obj.id = mymachine_id
+            form_obj.name = mymachine.name
+            form_obj.id = mymachine.id
             form_obj.save()
             
-        return redirect(reverse('projects:mymachine_detail', args=(project_id, mymachine_id)))
+        return redirect(reverse('projects:mymachine', args=(project_id,)))
 
 
-    return render(request, 'projects/mymachine_detail.html', context)
+    return render(request, 'projects/mymachine.html', context)
 
 def extra_machine_marco_create(request, project_id, mymachine_id):
     form = ExtraMachineMarcoModelForm()
@@ -393,7 +431,7 @@ def extra_machine_marco_create(request, project_id, mymachine_id):
             form_obj.machine = MyMachine.objects.get(id=mymachine_id)
             form_obj.save()
         
-        return redirect(reverse('projects:mymachine_detail', args=(project_id, mymachine_id)))
+        return redirect(reverse('projects:mymachine', args=(project_id,)))
             
     return render(request, 'projects/extra_machine_marco_create.html', context)
 
@@ -405,7 +443,7 @@ def mymachine_file(request, project_id, mymachine_id):
             raise Exception('shell command task error')
         elif (result._get_task_meta())["status"] == 'SUCCESS':
             break
-    return redirect(reverse('projects:mymachine_detail', args=(project_id, mymachine_id))) 
+    return redirect(reverse('projects:mymachine', args=(project_id,))) 
 
 
 def myimage_create(request, project_id):
@@ -421,7 +459,7 @@ def myimage_create(request, project_id):
             form_obj.project = Project.objects.get(id=project_id)
             form_obj.save()
         
-        return redirect(reverse('projects:mymeta', args=(project_id,)))
+        return redirect(reverse('projects:myimages', args=(project_id,)))
 
     return render(request, 'projects/myimage_create.html', context)
 

@@ -19,6 +19,13 @@ class ProjectModelForm(forms.ModelForm):
             'project_version': 'Yocto Version',
         }
 
+class ProjectImportForm(forms.Form):
+
+    name = forms.CharField(max_length=60, 
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    url = forms.CharField(max_length=300,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+                    
 class MetaModelForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -221,7 +228,7 @@ class MyMachineModelForm(forms.ModelForm):
                 'kernel_dts', 'uboot_defconfig', 'kernel_defconfig', 'machineoverrides',
                 'distro_version']
 
-        not_required = ('uboot', 'kernel', 'flash', 'filesystem', 'jffs2_eraseblock', 
+        not_required = ('name', 'uboot', 'kernel', 'flash', 'filesystem', 'jffs2_eraseblock', 
                  'mkubifs_args', 'ubinize_args', 'mxsboot_nand_args', 'machine_include',
                 'distro_include', 'kernel_dts', 'uboot_defconfig', 'kernel_defconfig', 
                 'machineoverrides')
@@ -256,7 +263,7 @@ class MyMachineModelForm(forms.ModelForm):
             'distro_include': 'Distro File Include',
             'kernel_dts': 'Kernel DeviceTree',
             'machineoverrides': 'MACHINEOVERRIDES',
-            'distro_version': 'Distro Version',
+            'distro_version': 'Version',
         }
 
 

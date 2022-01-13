@@ -136,6 +136,10 @@ Please Install docker & docker-compose on your host according to the official do
 
     $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
     ```
+2. Set Your Yocto Project Path
+   ```sh
+   $ export DIANSHAO_YOCTO_PROJECT_PATH="your yocto project path"
+   ```
 
 2. Docker Image build
    ```sh

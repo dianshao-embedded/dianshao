@@ -3,14 +3,17 @@
 
   <div class="container", style="margin-top: 100px">
   <div class='row'>
-    <div class="four columns">
-      <a href="{% url 'projects:mymeta' project_id %}" class="button" style="width: 280px;">Develope My Meta</a>
+    <div class="three columns">
+      <a href="{% url 'projects:mymachine' project_id %}" class="button" style="width: 200px;">Develop My Meta</a>
     </div>    
-    <div class="four columns">
-      <a href="{% url 'projects:meta_create' project_id %}" class="button" style="width: 280px;">Add third-party meta layer</a>
+    <div class="three columns">
+      <a href="{% url 'projects:meta_create' project_id %}" class="button" style="width: 200px;">Add meta layer</a>
     </div>
-    <div class="four columns">
-      <a href="{% url 'projects:bitbake' project_id %}" class="button" style="width: 280px;">Bitbake Command</a>
+    <div class="three columns">
+      <a href="{% url 'projects:bitbake' project_id %}" class="button" style="width: 200px;">Bitbake Command</a>
+    </div>
+    <div class="three columns">
+      <a href="{% url 'projects:project_export' project_id %}" class="button" style="width: 200px;">Export Project</a>
     </div>
   </div>
   </div>

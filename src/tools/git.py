@@ -37,6 +37,26 @@ class git_submodule(Thread):
 
         return 'add submodule success'
 
+
+class git_clone(Thread):
+    def __init__(self, repo_url, father_path, repo_name):
+        self.father_path = father_path
+        self.repo_name = repo_name
+        self.repo_url = repo_url
+        super().__init__()
+
+    def run(self):
+        try:
+            repo = Repo.clone_from(url=self.repo_url,
+                            to_path=os.path.join(self.father_path, self.repo_name),
+                            progress=GitProgress())
+            
+            repo.submodule_update(progress=GitProgress())
+
+        except:
+            raise Exception("%s clone error" % self.repo_name)
+
+
 class GitProgress(RemoteProgress):
     def __init__(self):
         super().__init__()

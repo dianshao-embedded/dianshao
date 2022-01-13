@@ -131,7 +131,12 @@
     $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
     ```
 
-2. Docker 镜像编译
+2. 设置你的 Yocto Project 项目
+   ```sh
+   $ export DIANSHAO_YOCTO_PROJECT_PATH="your yocto project path"
+   ```
+
+3. Docker 镜像编译
    ```sh
    $ sudo docker-compose build
    ```
@@ -139,15 +144,20 @@
    *注意：如果使用国内网络编译速度过慢，可使用如下命令使用国内镜像源*
 
     ```sh
-    $ cp ./docker/docker-compose-with-mirror.yml docker-compose.yml
-
-   $ sudo docker-compose build
+   $ sudo docker-compose -f docker-compose-with-mirror.yml build
    ```
 
-3. Docker 容器启动
+4. Docker 容器启动
    ```sh
    $ sudo docker-compose up
    ```
+   *注意：如果使上一步使用国内镜像源，请使用下面命令*
+
+    ```sh
+   $ sudo docker-compose -f docker-compose-with-mirror.yml up
+   ```
+
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

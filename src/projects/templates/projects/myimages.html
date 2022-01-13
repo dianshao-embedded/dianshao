@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+  <div class="container", style="margin-top: 60px;">
+    <div class='row' style="margin-top: 60px;">
+      <div class="six columns">
+        <h5> Step3: Make My Images </h5>
+      </div>  
+      <div class="three columns">
+        <a href="{% url 'projects:myimage_create' project_id %}" class="button"> New Image </a>
+      </div>  
+    </div>
+
+    <table style="width: 960px; margin-top: 0px;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Base</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for myimage in myimages %}
+        <tr>
+          <td>{{ myimage.name }}</td>
+          <td>{{ myimage.description }}</td>
+          <td>{{ myimage.base }}</td>
+          <td>
+            <a href="{% url 'projects:myimage_detail' project_id myimage.id %}" class="button">Details</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

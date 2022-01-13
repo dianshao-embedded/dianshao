@@ -272,7 +272,8 @@ class DianshaoMachineFile():
                 f.write('UBOOT_CONFIG[emmc] = "%s,sdcard"\n' % self.machine.uboot_defconfig)
             elif self.machine.flash == 'SDCard':
                 f.write('UBOOT_CONFIG = "sd"\n')
-                f.write('UBOOT_CONFIG[sd] = "%s,sdcard"\n' % self.machine.uboot_defconfig)
+                if self.machine.uboot_defconfig != '':
+                    f.write('UBOOT_CONFIG[sd] = "%s,sdcard"\n' % self.machine.uboot_defconfig)
         else:
             if self.machine.machineoverrides != '':
                 f.write('MACHINEOVERRIDES =. "%s"\n' % self.machine.machineoverrides)
@@ -330,7 +331,7 @@ class DianshaoMachineFile():
             f.write('include %s\n' % i)
 
         f.write('DISTRO = "%s"\n' % self.machine.name)
-        f.write('DISTRO_NAME = "%s"\n' % self.machine.description)
+        f.write('DISTRO_NAME = "%s"\n' % self.machine.name)
         # TODO: add distro version
         f.write('DISTRO_VERSION = "1.0.0"\n')
 

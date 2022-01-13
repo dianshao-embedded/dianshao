@@ -5,7 +5,9 @@ from celery import shared_task
 from progressui.backend import ProgressSend
 from git.repo.base import Repo
 from tools import shell, git, bbcommand, patch, bbfile
-from .models import MetaLayer, Project
+from tools import migration
+from tools.migration import Migration
+from .models import MetaLayer, MyMachine, Project
 
 # TODO：后续提高稳定性，无论如何误操作可自恢复
 @shared_task(bind=True)
@@ -18,6 +20,11 @@ def project_initial_task(self, project_id, project_path, project_version, projec
     r, err = shell.shell_cmd('cp -rp %s/. %s' % (template_path, target_path), os.curdir)
     if err == True:
         raise Exception("project template build error: %s" % (r))
+
+    project=Project.objects.get(id=project_id)
+    MyMachine.objects.create(project=project, name='dianshao', base='none', initial_method='Systemd', flash='SDCard', 
+                    distro_version='1.0.0', description='my machine generate by dianshao', 
+                    machine_include='{}', distro_include='{}')
 
     # TODO: 根据项目名自动生成 distro, image, machine, bblayer, conf.sample 等文件
     Repo.init(target_path)
@@ -161,6 +168,49 @@ def project_initial_task(self, project_id, project_path, project_version, projec
         raise Exception('Project is not complete')
 
     return "Project Create Success"
+
+@shared_task(bind=True)
+def project_import_task(self, project_path, project_name, url):
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server.bind(('', 8866))
+    progress_send = ProgressSend(self)
+    progress_send.send_progress(percentage=50, description='Clone Project')
+
+    project_repo = git.git_clone(url, project_path, project_name)
+    project_repo.start()
+
+    path = os.path.join(project_path, project_name)
+
+    i = 0
+    while(os.path.exists(path) == False and i < 3):    
+
+        while project_repo.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage=50, subProgress=sub, description='Start Clone Project')               
+
+        if os.path.exists(path):
+            break
+        else:
+            i += 1
+
+    if i == 3:
+        raise Exception('git clone error')
+
+    target_path = os.path.join(project_path, project_name)
+    bitbake_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bitbake')
+    r, err = shell.shell_cmd(command=('cp -r %s %s' % (bitbake_path, target_path)), cwd = target_path)
+    if err == True:
+        server.close()
+        raise Exception("project template build error: %s" % (r))
+
+    m = Migration()
+    m.project_import(project_path, project_name)
 
 
 @shared_task(bind=True)
@@ -318,6 +368,8 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
     server.close()
 
+
+
     return 'bitbake target success'
 
 @shared_task(bind=True)
@@ -367,3 +419,11 @@ def shell_cmd_task(self, cmd, cwd):
     ret, error = shell.shell_cmd(command=cmd, cwd=cwd)
     if error:
         raise Exception(ret)
+
+@shared_task(bind=True)
+def project_export_task(self, project_id):
+    progress_send = ProgressSend(self)
+    progress_send.send_progress(percentage=0, description='project exporting')
+    m = Migration()
+    m.project_export(project_id)
+
