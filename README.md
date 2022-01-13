@@ -119,27 +119,31 @@ Please Install docker & docker-compose on your host according to the official do
     *Using on Linux*
    ```sh
    $ git clone https://github.com/croakexciting/dianshao.git && cd ./dianshao
-
-   $ sudo chown -R 1000:1000 ./yocto_projects
    ```
-
-   *notes：Because bitbake can't use by root, please don't use dianshao in root. And make sure the folder permissions is 1000:1000*
-
     *Using on Windows*
 
     ```sh
     $ git clone https://github.com/croakexciting/dianshao.git -c core.autocrlf=false
-    
+
     $ cd ./dianshao
-
-    $ rm .\yocto_projects\.gitkeep
-
-    $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
     ```
+
 2. Set Your Yocto Project Path
    ```sh
    $ export DIANSHAO_YOCTO_PROJECT_PATH="your yocto project path"
    ```
+
+    *notes：If using on Linux, please don't use dianshao in root and make sure the folder permissions is 1000:1000*
+
+    ```sh
+    $ sudo chown -R 1000:1000 $DIANSHAO_YOCTO_PROJECT_PATH
+    ```
+
+    *notes：If using on windows, please enable the folder case sensitive option*
+
+    ```sh
+    $ fsutil.exe file setCaseSensitiveInfo $DIANSHAO_YOCTO_PROJECT_PATH enable
+    ```
 
 2. Docker Image build
    ```sh
