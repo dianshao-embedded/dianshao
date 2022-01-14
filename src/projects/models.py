@@ -143,7 +143,7 @@ class LocalFile(models.Model):
     name = models.CharField(max_length=60)
     type = models.CharField(max_length=30)
     path = models.CharField(max_length=200)
-    content = models.CharField(max_length=2000)
+    content = models.CharField(max_length=20000)
 
 class ExtraMarco(models.Model):
     package = models.ForeignKey(MyPackages, on_delete=models.CASCADE)
