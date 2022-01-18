@@ -125,16 +125,23 @@
     $ git clone https://github.com/croakexciting/dianshao.git -c core.autocrlf=false
     
     $ cd ./dianshao
-
-    $ rm .\yocto_projects\.gitkeep
-    
-    $ fsutil.exe file setCaseSensitiveInfo .\yocto_projects\ enable
     ```
 
-2. 设置你的 Yocto Project 项目
+2. 设置你的 Yocto Project 项目存放路径
    ```sh
    $ export DIANSHAO_YOCTO_PROJECT_PATH="your yocto project path"
    ```
+   *注意：如果在 Linux 中使用，请确保项目文件夹权限为 1000：1000*
+
+    ```sh
+    $ sudo chown -R 1000:1000 $DIANSHAO_YOCTO_PROJECT_PATH
+    ```
+
+   *注意：如果在 Windows 中使用，请打开该文件夹大小写敏感选项*
+
+    ```sh
+    $ fsutil.exe file setCaseSensitiveInfo $DIANSHAO_YOCTO_PROJECT_PATH enable
+    ```
 
 3. Docker 镜像编译
    ```sh
