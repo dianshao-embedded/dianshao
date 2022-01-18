@@ -116,8 +116,11 @@ class MyPackages(models.Model):
     local_files = models.CharField(max_length=200)
     files_install_directory = models.CharField(max_length=60)
     building_directory = models.CharField(max_length=100)
+    source_directory = models.CharField(max_length=100)
     inherit = models.CharField(max_length=60)
     systemd_service_pn = models.CharField(max_length=120)
+    config_file_path = models.CharField(max_length=120)
+    go_proxy = models.CharField(max_length=120)
 
 class Tasks(models.Model):
     TASKS_TYPE = [
@@ -143,7 +146,8 @@ class LocalFile(models.Model):
     name = models.CharField(max_length=60)
     type = models.CharField(max_length=30)
     path = models.CharField(max_length=200)
-    content = models.CharField(max_length=2000)
+    #TODO: 最大文件内容长度还需要优化
+    content = models.CharField(max_length=20000)
 
 class ExtraMarco(models.Model):
     package = models.ForeignKey(MyPackages, on_delete=models.CASCADE)

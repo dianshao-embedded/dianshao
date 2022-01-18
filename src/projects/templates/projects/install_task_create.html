@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="six columns">
+          <label>{{ form.name.label }}</label>
+          {{ form.name }}
+        </div>
+        <div class="two columns">
+          <label>{{ form.is_directory.label }}</label>
+          {{ form.is_directory }}
+        </div>
+        <div class="two columns">
+          <label>{{ form.permission.label }}</label>
+          {{ form.permission }}
+        </div>
+        <div class="two columns">
+          <label>{{ form.type.label }}</label>
+          {{ form.type }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="six columns">
+          <label>{{ form.source_path.label }}</label>
+          {{ form.source_path }}
+        </div>
+        <div class="six columns">
+          <label>{{ form.install_path.label }}</label>
+          {{ form.install_path }}
+        </div>
+      </div>
+    <input class="button-primary" type="submit" value="New Task">
+  </form>
+</div>
+
+{% endblock %}

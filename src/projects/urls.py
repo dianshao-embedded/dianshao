@@ -19,6 +19,7 @@ urlpatterns = [
     path('<int:project_id>/mypackage_create', views.mypackage_create, name='mypackage_create'),
     path('<int:project_id>/mypackage/<int:mypackage_id>', views.mypackage_detail, name='mypackage_detail'),
     path('<int:project_id>/mypackage/<int:mypackage_id>/task_create', views.task_create, name='task_create'),
+    path('<int:project_id>/mypackage/<int:mypackage_id>/install_task_create', views.install_task_create, name='install_task_create'),    
     path('<int:project_id>/mypackage/<int:mypackage_id>/extra_marco_create', views.extra_marco_create, name='extra_marco_create'),
     path('<int:project_id>/mypackage/<int:mypackage_id>/file_create', views.file_create, name='file_create'),
     path('<int:project_id>/mypackage/<int:mypackage_id>/file_import', views.file_import, name='file_import'),

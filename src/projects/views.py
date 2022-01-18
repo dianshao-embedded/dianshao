@@ -1,3 +1,4 @@
+from celery import Task
 from django.shortcuts import redirect, render
 from django.template import context
 from django.urls import reverse
@@ -163,6 +164,8 @@ def mypackage_create(request, project_id):
         if form.is_valid():
             form_obj = form.save(commit=False)
             form_obj.project = Project.objects.get(id=project_id)
+            if form_obj.language == 'Golang':
+                form_obj.depends = 'go-native'
             form_obj.save()
         
         return redirect(reverse('projects:mypackages', args=(project_id,)))
@@ -217,6 +220,32 @@ def task_create(request, project_id, mypackage_id):
         return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
             
     return render(request, 'projects/task_create.html', context)
+
+def install_task_create(request, project_id, mypackage_id):
+    form = InstallTaskForm()
+    context = {
+        'form': form,
+        'project_id': project_id,
+    }
+
+    if request.method == 'POST':
+        form = InstallTaskForm(request.POST)
+        if form.is_valid():
+            package = MyPackages.objects.get(id=mypackage_id)
+            type = 'do_install'
+            subtype = form.cleaned_data['type']
+            op1 = ("install -d %s" % form.cleaned_data['install_path'])
+            desc1 = ("enter %s" % form.cleaned_data['install_path'])
+            op2 = ("install -m %s %s/%s %s" % (form.cleaned_data['permission'], 
+                    form.cleaned_data['source_path'], form.cleaned_data['name'], 
+                    form.cleaned_data['install_path']))
+            desc2 = ("copy file %s to %s" % (form.cleaned_data['name'], form.cleaned_data['install_path']))
+
+            Tasks.objects.create(package=package, type=type, subtype=subtype, op=op1, description=desc1)
+            Tasks.objects.create(package=package, type=type, subtype=subtype, op=op2, description=desc2)
+        return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
+            
+    return render(request, 'projects/install_task_create.html', context)
 
 def extra_marco_create(request, project_id, mypackage_id):
     form = ExtraMarcoModelForm()
@@ -500,6 +529,10 @@ def myimagepackage_create(request, project_id, myimage_id):
         if form.is_valid():
             form_obj = form.save(commit=False)
             form_obj.image = MyImage.objects.get(id=myimage_id)
+            if form_obj.language == 'Golang':
+                form_obj.depends = 'go-native'
+            if form_obj.donwload_method == 'git':
+                form_obj.building_directory = "$(WORKDIR)/git"
             form_obj.save()
         
         return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))

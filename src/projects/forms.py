@@ -1,3 +1,4 @@
+from random import choice
 from django import forms
 from .models import *
 from django.contrib.postgres.forms import SimpleArrayField
@@ -105,11 +106,12 @@ class MyPackagesModelForm(forms.ModelForm):
                 'depends', 'description', 'local_files','src_url', 'src_rev', 'src_url_md5',
                 'src_url_sha256', 'files_install_directory', 'building_directory',
                 'inherit', 'language', 'donwload_method', 'initial_method', 'systemd_auto_enable',
-                'systemd_service_name')
+                'systemd_service_name', 'config_file_path', 'go_proxy', 'source_directory')
         
         not_required = ('license_default', 'license', 'lic_files_chksum','depends', 'description', 'local_files',
                 'src_url', 'src_rev', 'src_url_md5','src_url_sha256', 'files_install_directory',
-                'building_directory', 'inherit', 'initial_method', 'language', 'systemd_service_name', 'systemd_auto_enable')
+                'building_directory', 'inherit', 'initial_method', 'language', 'systemd_service_name', 'systemd_auto_enable', 
+                'config_file_path', 'go_proxy', 'source_directory')
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder':'my-bbfile'}),
@@ -128,14 +130,18 @@ class MyPackagesModelForm(forms.ModelForm):
             'src_url_md5': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'When downloading remote files, you need to fill in'}),
             'src_url_sha256': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'When downloading remote files, you need to fill in'}),
             'files_install_directory': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'The folder in the filesystem that you wish to mount'}),
-            'building_directory': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'The working folder which contain the files that need by bitbake tasks'}),
+            'building_directory': forms.TextInput(attrs={'class': 'u-full-width'}),
             'local_files': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'file://file1;file://file2...'}),
             'inherit': forms.TextInput(attrs={'class': 'u-full-width'}),
             'systemd_auto_enable': forms.Select(attrs={'class': 'u-full-width'}),
-            'systemd_service_name': forms.TextInput(attrs={'class': 'u-full-width'})
+            'systemd_service_name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'config_file_path': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'go_proxy': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'source_directory': forms.TextInput(attrs={'class': 'u-full-width'}),
         }
 
         labels = {
+            'depends': 'Depends (You can enter multiple dependencies, separated by spaces)',
             'src_rev': 'Src Revision',
             'src_url': 'Src Url',
             'src_url_md5': 'Src Url Md5',
@@ -146,6 +152,8 @@ class MyPackagesModelForm(forms.ModelForm):
             'initial_method': 'Initial Method',
             'systemd_auto_enable': 'Service Auto Enable',
             'systemd_service_name': 'Service File Name',
+            'building_directory': 'Build Directory ($B)',
+            'source_directory': 'Source Directory ($S)',
         }
 
 class TaskModelForm(forms.ModelForm):
@@ -340,3 +348,17 @@ class MyConfForm(forms.Form):
     max_parallel_threads = forms.CharField(max_length=100, 
                     widget=forms.TextInput(attrs={'class': 'u-full-width'}),
                     label='Max Parallel Tasks Number')
+
+class InstallTaskForm(forms.Form):
+    name = forms.CharField(max_length=60, 
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    install_path = forms.CharField(max_length=300,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    source_path = forms.CharField(max_length=300,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width'}))
+    permission = forms.CharField(max_length=100,
+                    widget=forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'excute permission'}))
+    is_directory = forms.ChoiceField(widget=forms.Select(attrs={'class': 'u-full-width'}),
+                    label='Is Directory?', choices=[('no', 'No'), ('yes', 'Yes')])
+    type = forms.ChoiceField(widget=forms.Select(attrs={'class': 'u-full-width'}),
+                    label='Install Type', choices=[('none', 'None'), ('append', 'Append'), ('prepend', 'Prepend')])

@@ -100,9 +100,14 @@ class DianshaoBBFile():
         if package.src_url_md5 != '':
             f.write('SRC_URI[src_url_md5] = "%s"\n' % package.src_url_md5)
 
-        if package.building_directory != '':
-            f.write('S = "%s"\n' % package.building_directory)
+        if package.source_directory != '':
+            f.write('S = "%s"\n' % package.source_directory)
 
+        """
+        if package.building_directory != '':
+            f.write('B = "%s"\n' % package.building_directory)
+        """
+        
         # generate inherit
         if package.initial_method == 'Systemd':
             if package.language == 'Golang':
@@ -118,10 +123,16 @@ class DianshaoBBFile():
                 f.write('inherit update-rc.d\n')
 
         if package.language == 'Golang':
+            f.write('export HOME = "${WORKDIR}"\n')
             f.write('export GOOS = "${TARGET_GOOS}"\n')
             f.write('export GOARCH = "${TARGET_GOARCH}"\n')
             f.write('export GOARM = "${TARGET_GOARM}"\n')
             f.write('export GOCACHE = "${WORKDIR}/go/cache"\n')
+            if package.go_proxy != '':
+                f.write('export GOPROXY = "%s"\n' % package.go_proxy)
+
+        if package.config_file_path != '':
+            f.write('CONFFILES_${PN} = "%s"\n' % package.config_file_path)
 
         for em in extraMarco:
             if em.strength == 'normal':
