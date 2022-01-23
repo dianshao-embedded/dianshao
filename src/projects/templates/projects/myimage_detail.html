@@ -32,6 +32,12 @@
       </div>
     </div>
     {% endif %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.packages.label }}</label>
+        {{ form.packages }}
+      </div>
+    </div>
     <input class="button" type="submit" style="width: 210px; margin-top: 10px;" value="Update Image">
   </form>
 </div>
@@ -40,31 +46,47 @@
   <table class="u-full-width">
     <thead>
       <tr>
-        <th>Name</th>
+        <th>Extra Marco</th>
+        <th>Value</th>
         <th>Description</th>
-        <th>Version</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
-      {% for package in packages %}
+      {% for extraMarco in extraMarcos %}
       <tr>
-        <td>{{ package.name }}</td>
-        <td>{{ package.description }}</td>
-        <td>{{ package.version }}</td>
+        <td>{{ extraMarco.name }}</td>
+        <td>{{ extraMarco.value }}</td>
+        <td>{{ extraMarco.description }}</td>
+        <form action="{% url 'projects:image_extra_macro_delete' project_id myimage_id extraMarco.id %}" method="POST">
+          {% csrf_token %}
+          <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+        </form>        
       </tr>
       {% endfor %}
     </tbody>
   </table>
   <div class='row'>
     <div class="three columns">
-    <a href="{% url 'projects:package_import' project_id myimage_id %}" class="button" style="width: 200px;"> Import Package </a>
+    <a href="{% url 'projects:image_extra_marco_create' project_id myimage_id %}" class="button" style="width: 200px;"> Add Extra Macro </a>
     </div>
   </div>
-  <br>
+</div>
+<div class="container", style="margin-top: 50px">
+  <div class="row">
+    <div class="four columns">
   <form action="{% url 'projects:myimage_file' project_id myimage_id %}" method="post">
     {% csrf_token %}
-    <input class="button-primary" type="submit" style="width: 400px; margin-top: 10px;" value="Bitbake Image!!">
+    <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="Make Image File">
   </form>
+  </div>
+  <div class="four columns">
+  <form action="{% url 'projects:myimage_bitbake' project_id myimage_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="Bitbake Image!!">
+  </form>
+  </div>
+  </div>
 </div>
 
 {% endblock %}

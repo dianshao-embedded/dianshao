@@ -1,3 +1,4 @@
+from re import T
 from django import VERSION
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -94,9 +95,16 @@ class MyPackages(models.Model):
         ('disable', 'disable'),
     ]
 
+    CATAGORY = [
+        ('recipes-kernel', 'recipes-kernel'),
+        ('recipes-bsp', 'recipes-bsp'),
+        ('recipes-dianshao', 'recipes-dianshao'),
+    ]
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=30, choices=FILE_TYPE)
+    catagory = models.CharField(max_length=100, choices=CATAGORY)
     language = models.CharField(max_length=30, choices=LANGUAGE)
     donwload_method = models.CharField(max_length=30, choices=DOWNLOAD_METHOD)
     initial_method = models.CharField(max_length=30, choices=INITIAL_METHOD)
@@ -120,7 +128,9 @@ class MyPackages(models.Model):
     inherit = models.CharField(max_length=60)
     systemd_service_pn = models.CharField(max_length=120)
     config_file_path = models.CharField(max_length=120)
-    go_proxy = models.CharField(max_length=120)
+    go_env = ArrayField(models.CharField(max_length=120, blank=True))
+    files_pn = ArrayField(models.CharField(max_length=120, blank=True))
+    extra_oemake = ArrayField(models.CharField(max_length=60, blank=True))
 
 class Tasks(models.Model):
     TASKS_TYPE = [
@@ -248,6 +258,8 @@ class MyImage(models.Model):
     fs_name = models.CharField(max_length=30)
     fs_start = models.CharField(max_length=30)
     fs_end = models.CharField(max_length=30)
+    packages = ArrayField(models.CharField(max_length=60, blank=True))
+
 
 class MyImagePackage(models.Model):
     image = models.ForeignKey(MyImage, on_delete=models.CASCADE)
@@ -255,6 +267,21 @@ class MyImagePackage(models.Model):
     description = models.CharField(max_length=60)
     version = models.CharField(max_length=60)
     
+class MyImageExtraMarco(models.Model):
+    image = models.ForeignKey(MyImage, on_delete=models.CASCADE)
+    name = models.CharField(max_length=60)
+    value = models.CharField(max_length=300)
+    description = models.CharField(max_length=300)
+
+    VALUE_SETTING_STRENGTH_LEVEL = [
+        ('normal', 'normal'),
+        ('weak', 'weak'),
+        ('very weak', 'very weak'),
+        ('append', 'append'),
+    ]
+    strength = models.CharField(max_length=100, 
+                        choices=VALUE_SETTING_STRENGTH_LEVEL)
+
 # TODO：my machine 需要根据使用的芯片来确定，这部分放到后面去做，先选择使用的芯片厂家，然后生成需要配置的宏
 # 或者直接改成 my-uboot 和 my-kernel，根据 boot 和 kernel 的bbfile直接生成相应的宏
 # 第一步还是将其作为文件系统制作工具，machine直接采用支持包做好的形式来，后续不断增加支持的芯片，可以根据芯片去灵活修改就行了

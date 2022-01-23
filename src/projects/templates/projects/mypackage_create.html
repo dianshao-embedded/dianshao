@@ -5,9 +5,13 @@
   <form action="" method="post">
     {% csrf_token %}
     <div class="row">
-      <div class="six columns">
+      <div class="three columns">
         <label>{{ form.name.label }}</label>
         {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.catagory.label }}</label>
+        {{ form.catagory }}
       </div>
       <div class="three columns">
         <label>{{ form.version.label }}</label>

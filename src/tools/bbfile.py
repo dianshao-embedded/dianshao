@@ -9,12 +9,13 @@ class DianshaoBBFile():
         self.type = type
         self.bbfile = name + '_' + version + '.' + type
     
-    def create_folder(self, project_path):
+    def create_folder(self, project_path, recipes):
         meta_path = os.path.join(project_path, 'meta')
         if not os.path.exists(meta_path):
             os.mkdir(meta_path)
         
-        recipes_path = os.path.join(meta_path, 'recipes-dianshao')
+        recipes_path = os.path.join(meta_path, recipes)
+
         if not os.path.exists(recipes_path):
             os.mkdir(recipes_path)
 
@@ -70,7 +71,8 @@ class DianshaoBBFile():
             else:
                 pass
         else:
-            f.write('LICENSE = "%s"\n' % package.license)
+            if package.license != '':
+                f.write('LICENSE = "%s"\n' % package.license)
             if package.lic_files_chksum != '':
                 f.write('LIC_FILES_CHKSUM = "%s"\n' % package.lic_files_chksum)
         if package.depends != '':
@@ -128,11 +130,18 @@ class DianshaoBBFile():
             f.write('export GOARCH = "${TARGET_GOARCH}"\n')
             f.write('export GOARM = "${TARGET_GOARM}"\n')
             f.write('export GOCACHE = "${WORKDIR}/go/cache"\n')
-            if package.go_proxy != '':
-                f.write('export GOPROXY = "%s"\n' % package.go_proxy)
+
+            for env in package.go_env:
+                f.write('export %s\n' % env)
+        
+        for eo in package.extra_oemake:
+            f.write('EXTRA_OEMAKE += "%s"\n' % eo)
 
         if package.config_file_path != '':
             f.write('CONFFILES_${PN} = "%s"\n' % package.config_file_path)
+
+        for file_pn in package.files_pn:
+            f.write('FILES_${PN} += "%s"\n' % file_pn)
 
         for em in extraMarco:
             if em.strength == 'normal':
@@ -241,10 +250,21 @@ class DianshaoBBFile():
             raise Exception(ret)
 
     def create_local_file(self, name, content):
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
         f = open(os.path.join(self.files_path, name), "w")
         f.write(content)
         f.close()
 
+        file_path = os.path.join(self.files_path, name)
+        with open(file_path, 'rb') as open_file:
+            content = open_file.read()
+    
+        content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+
+        with open(file_path, 'wb') as open_file:
+            open_file.write(content)
+            open_file.close()
 
 class DianshaoMachineFile():
     
@@ -364,7 +384,7 @@ class DianshaoImageFile():
         if os.path.exists(image_path):
             os.remove(image_path)
 
-        packages = MyImagePackage.objects.filter(image__id=self.image.id)
+        extraMarco = MyImageExtraMarco.objects.filter(image__id=self.image.id)
 
         f = open(image_path, 'w')
         f.write('# %s-%s\n' % (self.image.name, self.image.description))
@@ -378,9 +398,19 @@ class DianshaoImageFile():
         f.write('inherit extrausers\n')
         f.write('EXTRA_USERS_PARAMS = "usermod -P root root;"\n')
 
-        for package in packages:
-            f.write('IMAGE_INSTALL += "%s"\n', package.name)
+        for package in self.image.packages:
+            f.write('IMAGE_INSTALL += "%s"\n' % package)
 
+        for em in extraMarco:
+            if em.strength == 'normal':
+                f.write('%s = %s\n' % (em.name, em.value))
+            elif em.strength == 'weak':
+                f.write('%s ?= %s\n' % (em.name, em.value))
+            elif em.strength == 'very weak':
+                f.write('%s ??= %s\n' % (em.name, em.value))
+            elif em.strength == 'append':
+                f.write('%s += %s\n' % (em.name, em.value))
+                
         f.close()
 
 

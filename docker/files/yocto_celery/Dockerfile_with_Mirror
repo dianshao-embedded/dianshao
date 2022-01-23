@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 
-WORKDIR /app/yocto
-WORKDIR /app/task
+WORKDIR /home/dianshao/task
 
 ENV TZ=Asia/Shanghai DEBIAN_FRONTEND=noninteractive
 
@@ -30,7 +29,7 @@ COPY ./src/requirements.txt .
 RUN pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 RUN groupadd -g 1000 dianshao && useradd -r -u 1000 -g dianshao dianshao && \
-    chown -R dianshao:dianshao /app/yocto && chown -R dianshao:dianshao /app/task
+    chown -R dianshao:dianshao /home/dianshao
 
-COPY --chown=1000:1000 ./src /app/task
+COPY --chown=1000:1000 ./src /home/dianshao/task
 USER dianshao

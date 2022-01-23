@@ -27,5 +27,5 @@ services:
     container_name: dianshao-yocto
     restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
     volumes:
-      - ${DIANSHAO_YOCTO_PROJECT_PATH}:/app/yocto
+      - ${DIANSHAO_YOCTO_PROJECT_PATH}:/home/dianshao/yocto
     network_mode: host

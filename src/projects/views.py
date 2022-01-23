@@ -17,7 +17,7 @@ def project(request):
         form = ProjectModelForm(request.POST)
         if form.is_valid():
             project = form.save(commit=False)
-            project.project_path = '/app/yocto'
+            project.project_path = '/home/dianshao/yocto'
             project.save()
             result = shell_cmd_task.delay("mkdir %s/%s" % (project.project_path, project.project_name), project.project_path)
             while 1:
@@ -47,7 +47,7 @@ def project_import(request):
     if request.method == 'POST':
         form = ProjectImportForm(request.POST)
         if form.is_valid():
-            result = project_import_task.delay('/app/yocto',
+            result = project_import_task.delay('/home/dianshao/yocto',
                                             form.cleaned_data['name'],
                                             form.cleaned_data['url'])
                                         
@@ -166,11 +166,30 @@ def mypackage_create(request, project_id):
             form_obj.project = Project.objects.get(id=project_id)
             if form_obj.language == 'Golang':
                 form_obj.depends = 'go-native'
+            if form_obj.donwload_method == 'git':
+                form_obj.building_directory = "$(WORKDIR)/git"
             form_obj.save()
         
         return redirect(reverse('projects:mypackages', args=(project_id,)))
             
     return render(request, 'projects/mypackage_create.html', context={'form': form, 'project_id': project_id})
+
+def mypackage_delete(request, project_id, mypackage_id):
+    if request.method == 'POST':
+        project = Project.objects.get(id=project_id)
+        package = MyPackages.objects.get(id=mypackage_id)
+        result = shell_cmd_task.delay('rm -rf %s' % 
+                    (path.join(project.project_path, project.project_name, 
+                    'meta', package.catagory, package.name)), project.project_path)
+        while 1:
+            if (result._get_task_meta())["status"] == 'FAILURE':
+                raise Exception('shell command task error')
+            elif (result._get_task_meta())["status"] == 'SUCCESS':
+                break
+
+        package.delete()
+
+    return redirect(reverse('projects:mypackages', args=(project_id,)))
 
 def mypackage_detail(request, project_id, mypackage_id):
     project = Project.objects.get(id=project_id)
@@ -221,6 +240,13 @@ def task_create(request, project_id, mypackage_id):
             
     return render(request, 'projects/task_create.html', context)
 
+def task_delete(request, project_id, mypackage_id, task_id):
+    if request.method == 'POST':
+        task = Tasks.objects.get(id=task_id)
+        task.delete()
+
+    return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
+
 def install_task_create(request, project_id, mypackage_id):
     form = InstallTaskForm()
     context = {
@@ -240,6 +266,8 @@ def install_task_create(request, project_id, mypackage_id):
                     form.cleaned_data['source_path'], form.cleaned_data['name'], 
                     form.cleaned_data['install_path']))
             desc2 = ("copy file %s to %s" % (form.cleaned_data['name'], form.cleaned_data['install_path']))
+            package.files_pn.append(form.cleaned_data['install_path'])
+            package.save()
 
             Tasks.objects.create(package=package, type=type, subtype=subtype, op=op1, description=desc1)
             Tasks.objects.create(package=package, type=type, subtype=subtype, op=op2, description=desc2)
@@ -265,6 +293,13 @@ def extra_marco_create(request, project_id, mypackage_id):
             
     return render(request, 'projects/extra_marco_create.html', context)
 
+def extra_macro_delete(request, project_id, mypackage_id, macro_id):
+    if request.method == 'POST':
+        em = ExtraMarco.objects.get(id=macro_id)
+        em.delete()
+
+    return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
+
 def file_create(request, project_id, mypackage_id):
     # TODO: add auto install path target
     form = LocalFileModelForm()
@@ -284,7 +319,7 @@ def file_create(request, project_id, mypackage_id):
             form_obj = form.save(commit=False)
             result = bbfile_localfile_create_task.delay(mypackage.name, mypackage.version, mypackage.type,
                             path.join(project.project_path, project.project_name),
-                            form.cleaned_data['name'], form.cleaned_data['content'])
+                            form.cleaned_data['name'], form.cleaned_data['content'], mypackage_id)
 
             while 1:
                 if (result._get_task_meta())["status"] == 'FAILURE':
@@ -318,7 +353,7 @@ def file_import(request, project_id, mypackage_id):
             form_obj = form.save(commit=False)
             result = bbfile_localfile_create_task.delay(mypackage.name, mypackage.version, mypackage.type,
                             path.join(project.project_path, project.project_name),
-                            form.cleaned_data['path'], form.cleaned_data['name'])
+                            form.cleaned_data['path'], form.cleaned_data['name'], mypackage_id)
 
             while 1:
                 if (result._get_task_meta())["status"] == 'FAILURE':
@@ -349,7 +384,7 @@ def file_generate_patch(request, project_id, mypackage_id):
         if form.is_valid():
             result = patch_generator_task.delay(form.cleaned_data['name'], form.cleaned_data['path'],
                                 path.join(project.project_path, project.project_name),
-                                mypackage.name, mypackage.version, mypackage.type,
+                                mypackage.name, mypackage.version, mypackage.type, mypackage.catagory,
                                 form.cleaned_data['old'], form.cleaned_data['new'])
 
             while 1:
@@ -363,6 +398,26 @@ def file_generate_patch(request, project_id, mypackage_id):
             return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))                    
 
     return render(request, 'projects/generata_patch_file.html', context)
+
+def file_delete(request, project_id, mypackage_id, file_id):
+    package = MyPackages.objects.get(id=mypackage_id)
+    project = Project.objects.get(id=project_id)
+    file = LocalFile.objects.get(id=file_id)
+    if request.method == 'POST':
+        file = LocalFile.objects.get(id=file_id)
+        file.delete()
+
+        result = shell_cmd_task.delay('rm %s' % 
+                    (path.join(project.project_path, project.project_name, 
+                    'meta', package.catagory, package.name, 'files', file.name)), project.project_path)
+
+        while 1:
+            if (result._get_task_meta())["status"] == 'FAILURE':
+                raise Exception('shell command task error')
+            elif (result._get_task_meta())["status"] == 'SUCCESS':
+                break
+
+    return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
 
 def mypackage_bbfile(request, project_id, mypackage_id):
     project = Project.objects.get(id=project_id)
@@ -497,10 +552,10 @@ def myimage_detail(request, project_id, myimage_id):
     myimage = MyImage.objects.get(id=myimage_id)
     form = MyImageModelForm(instance=myimage)
 
-    packages = MyImagePackage.objects.filter(image__id = myimage_id).order_by('id')
+    extraMarcos = MyImageExtraMarco.objects.filter(image__id = myimage_id).order_by('id')
     context={
         'form': form,
-        'packages': packages,
+        'extraMarcos': extraMarcos,
         'project_id': project_id,
         'myimage_id': myimage_id,
     }
@@ -517,6 +572,31 @@ def myimage_detail(request, project_id, myimage_id):
 
     return render(request, 'projects/myimage_detail.html', context)
 
+def image_extra_marco_create(request, project_id, myimage_id):
+    form = MyImageExtraMarcoModelForm()
+    context = {
+        'form': form,
+        'project_id': project_id,
+    }
+
+    if request.method == 'POST':
+        form = MyImageExtraMarcoModelForm(request.POST)
+        if form.is_valid():
+            form_obj = form.save(commit=False)
+            form_obj.image = MyImage.objects.get(id=myimage_id)
+            form_obj.save()
+        
+        return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
+            
+    return render(request, 'projects/extra_image_marco_create.html', context)
+
+def image_extra_macro_delete(request, project_id, myimage_id, macro_id):
+    if request.method == 'POST':
+        em = MyImageExtraMarco.objects.get(id=macro_id)
+        em.delete()
+
+    return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))    
+
 def myimagepackage_create(request, project_id, myimage_id):
     form = MyImagePackageModelForm()
     context = {
@@ -529,10 +609,6 @@ def myimagepackage_create(request, project_id, myimage_id):
         if form.is_valid():
             form_obj = form.save(commit=False)
             form_obj.image = MyImage.objects.get(id=myimage_id)
-            if form_obj.language == 'Golang':
-                form_obj.depends = 'go-native'
-            if form_obj.donwload_method == 'git':
-                form_obj.building_directory = "$(WORKDIR)/git"
             form_obj.save()
         
         return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
@@ -546,7 +622,10 @@ def myimage_file(request, project_id, myimage_id):
             raise Exception('shell command task error')
         elif (result._get_task_meta())["status"] == 'SUCCESS':
             break
+                                
+    return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
 
+def myimage_bitbake(request, project_id, myimage_id):
     project = Project.objects.get(id=project_id)
     myimage = MyImage.objects.get(id=myimage_id)
 

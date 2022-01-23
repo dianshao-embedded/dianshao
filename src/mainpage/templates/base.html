@@ -36,7 +36,9 @@
         {% if project_id %}
         <a href="/projects/">Projects</a>
         <a href="{% url 'projects:metas' project_id %}">MyProject</a>
+        <!--
         <a href="{% url 'projects:mymachine' project_id %}">MyMachine</a>
+        -->
         <a href="{% url 'projects:mypackages' project_id %}">MyPackages</a>
         <a href="{% url 'projects:myimages' project_id %}">MyImages</a>
         {% else %}

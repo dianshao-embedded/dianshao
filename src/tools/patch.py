@@ -2,9 +2,9 @@ from .shell import shell_cmd
 from .bbfile import DianshaoBBFile
 import os
 
-def patch_generator(name, file_path, project_path, package_name, package_version, package_type, text1, text2):
+def patch_generator(name, file_path, project_path, package_name, package_version, package_type, catagory, text1, text2):
     fd = DianshaoBBFile(package_name, package_version, package_type)
-    fd.create_folder(project_path)
+    fd.create_folder(project_path, catagory)
     fd.create_local_file(name+'-old', text1)
     fd.create_local_file(name+'-new', text2)
 

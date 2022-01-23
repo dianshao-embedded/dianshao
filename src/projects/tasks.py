@@ -7,7 +7,7 @@ from git.repo.base import Repo
 from tools import shell, git, bbcommand, patch, bbfile
 from tools import migration
 from tools.migration import Migration
-from .models import MetaLayer, MyMachine, Project
+from .models import MetaLayer, MyMachine, MyPackages, Project
 
 # TODO：后续提高稳定性，无论如何误操作可自恢复
 @shared_task(bind=True)
@@ -367,29 +367,30 @@ def bitbake_progress(self, project_path, project_name, target, command):
             raise Exception('bitbake target failed with err CommandFailed')
 
     server.close()
-
-
-
+    
     return 'bitbake target success'
 
 @shared_task(bind=True)
 def bbfile_task_create(self, name, version, type, project_path, mypackage_id):
+    package = MyPackages.objects.get(id=mypackage_id)
     bb = bbfile.DianshaoBBFile(name, version, type)
-    bb.create_folder(project_path)
+    bb.create_folder(project_path, package.catagory)
     bb.create_bbfile(mypackage_id)
 
 
 @shared_task(bind=True)
-def bbfile_localfile_import_task(self, name, version, type, project_path, file_name, file_path):
+def bbfile_localfile_import_task(self, name, version, type, project_path, file_name, file_path, mypackage_id):
+    package = MyPackages.objects.get(id=mypackage_id)
     bb = bbfile.DianshaoBBFile(name, version, type)
-    bb.create_folder(project_path)
+    bb.create_folder(project_path, package.catagory)
     bb.create_local_file(file_path, file_name)
 
 
 @shared_task(bind=True)
-def bbfile_localfile_create_task(self, name, version, type, project_path, file_name, content):
+def bbfile_localfile_create_task(self, name, version, type, project_path, file_name, content, mypackage_id):
+    package = MyPackages.objects.get(id=mypackage_id)
     bb = bbfile.DianshaoBBFile(name, version, type)
-    bb.create_folder(project_path)
+    bb.create_folder(project_path, package.catagory)
     bb.create_local_file(file_name, content)
 
 @shared_task(bind=True)
@@ -410,9 +411,9 @@ def config_set_task(self, project_id, machine, distro, pm, pt):
 
 @shared_task(bind=True)
 def patch_generator_task(self, name, file_path, project_path, package_name, 
-        package_version, package_type, text1, text2):
+        package_version, package_type, catagory, text1, text2):
     patch.patch_generator(name, file_path, project_path, package_name, 
-        package_version, package_type, text1, text2)
+        package_version, package_type, catagory, text1, text2)
 
 @shared_task(bind=True)
 def shell_cmd_task(self, cmd, cwd):

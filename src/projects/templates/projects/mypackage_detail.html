@@ -5,9 +5,13 @@
   <form action="" method="post">
     {% csrf_token %}
     <div class="row">
-      <div class="six columns">
+      <div class="three columns">
         <label>{{ form.name.label }}</label>
         {{ form.name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.catagory.label }}</label>
+        {{ form.catagory }}
       </div>
       <div class="three columns">
         <label>{{ form.version.label }}</label>
@@ -18,6 +22,7 @@
         {{ form.type }}
       </div>
     </div>
+    {% if form.type.value == "bb" %}
     <div class="row">
       <div class="three columns">
         <label>{{ form.language.label }}</label>
@@ -36,6 +41,7 @@
         {{ form.license_default }}
       </div>
     </div>
+    {% endif %}
     <div class="row">
       <div class="twelve columns">
         <label>{{ form.description.label }}</label>
@@ -45,8 +51,15 @@
     {% if form.language.value == "Golang" %}
     <div class="row">
       <div class="twelve columns">
-        <label>{{ form.go_proxy.label }}</label>
-        {{ form.go_proxy }}
+        <label>{{ form.go_env.label }}</label>
+        {{ form.go_env }}
+      </div>
+    </div>
+    {% elif form.language.value == "C/C++" %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.extra_oemake.label }}</label>
+        {{ form.extra_oemake }}
       </div>
     </div>
     {% endif %}
@@ -140,6 +153,7 @@
           <tr>
             <th>Name</th>
             <th>Type</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -147,6 +161,10 @@
           <tr>
             <td>{{ localfile.name }}</td>
             <td>{{ localfile.type }}</td>
+            <form action="{% url 'projects:file_delete' project_id mypackage_id localfile.id %}" method="POST">
+              {% csrf_token %}
+              <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+            </form>
           </tr>
           {% endfor %}
         </tbody>
@@ -172,6 +190,7 @@
         <th>Tasks</th>
         <th>Subtype</th>
         <th>Description</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -180,6 +199,10 @@
         <td>{{ task.type }}</td>
         <td>{{ task.subtype }}</td>
         <td>{{ task.description }}</td>
+        <form action="{% url 'projects:task_delete' project_id mypackage_id task.id %}" method="POST">
+          {% csrf_token %}
+          <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+        </form>
       </tr>
       {% endfor %}
     </tbody>
@@ -201,6 +224,7 @@
         <th>Extra Marco</th>
         <th>Value</th>
         <th>Description</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -209,6 +233,10 @@
         <td>{{ extraMarco.name }}</td>
         <td>{{ extraMarco.value }}</td>
         <td>{{ extraMarco.description }}</td>
+        <form action="{% url 'projects:extra_marco_delete' project_id mypackage_id extraMarco.id %}" method="POST">
+          {% csrf_token %}
+          <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+        </form>
       </tr>
       {% endfor %}
     </tbody>

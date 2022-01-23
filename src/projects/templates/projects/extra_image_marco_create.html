@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container", style="margin-top: 30px">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="four columns">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+      <div class="six columns">
+        <label>{{ form.value.label }}</label>
+        {{ form.value }}
+      </div>
+      <div class="two columns">
+        <label>{{ form.strength.label }}</label>
+        {{ form.strength }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+    </div>
+    <input class="button-primary" type="submit" value="New Macro Define">
+  </form>
+</div>
+
+{% endblock %}
