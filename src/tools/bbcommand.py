@@ -18,7 +18,7 @@ class BitbakeThread(Thread):
         time.sleep(1)
         ret, err = shell.shell_cmd(command=('unset BBPATH; \
                                             bash -c "source %s %s; \
-                                            %s %s -u dianshao -c %s >> dianshao_bitbake.log 2>&1"' 
+                                            %s %s -u dianshao -c %s > dianshao_bitbake.log 2>&1"' 
                                             % (self.env, self.builddir, self.bitbake, self.target, self.command)), 
                                     cwd=self.path)
         if err == True:

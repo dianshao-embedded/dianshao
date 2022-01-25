@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 import socket
 import json
+from sqlite3 import Timestamp
 from celery import shared_task
 from progressui.backend import ProgressSend
 from git.repo.base import Repo
@@ -297,33 +299,48 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
     progress_send = ProgressSend(self)
 
+    lock_file = os.path.join(project_path, project_path, 'build/bitbake.lock')
+    if os.path.exists(lock_file):
+        raise Exception('Another Bitbake Process')
+
+    start_time = datetime.now().timestamp()
+
     while True:
         bbprogress_byte, addr = server.recvfrom(8192)
-        print(bbprogress_byte)
         bbprogress = json.loads(bbprogress_byte.decode('ascii'))
         if bbprogress['event_type'] == 'dianshao_ui_start':
             print('dianshao ui has already started')
 
         if bbprogress['event_type'] == 'TaskList':
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
             sub = []
             # TODO: 处理 progress < 0
             for task in bbprogress['tasks']:
-                sub.append({'percentage': task['progress'], 'description': (('%s:%s') %(task['title'], task['rate']))})
+                if task['progress'] < 0:
+                    sub.append({'percentage': 0, 'description': ('%s pending' % task['title'])})
+                else:
+                    sub.append({'percentage': task['progress'], 'description': (('%s:%s') %(task['title'], task['rate']))})
             
-            progress_send.send_progress(subProgress=sub)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s), subProgress=sub)
             continue
 
         if bbprogress['event_type'] == 'Ping':
             # TODO: Server Command
-            # TODO: ping interval 
-            progress_send.send_progress(description='Bitbaking...')
+            # TODO: ping interval
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s))
 
         if bbprogress['event_type'] == 'End':
             if bbprogress['total_error'] > 0:
+                progress_send.send_progress(header='Bitbake Failed', description=bbprogress['summary'])
                 raise Exception('Bitbake Failed, With %s errors' % bbprogress['total_error'])
             elif bbprogress['total_task_failures'] > 0:
+                progress_send.send_progress(header='Bitbake Failed', description=bbprogress['summary'])
                 raise Exception('Bitbake Failed, With %s errors' % bbprogress['total_task_failures'])
             else:
+                progress_send.send_progress(header='Bitbake Success', description=bbprogress['summary'])
                 return ('Bitbake Success with %s Warnings' % bbprogress['total_warning'])
         
         if bbprogress['event_type'] == 'CommandFailed':
@@ -334,32 +351,77 @@ def bitbake_progress(self, project_path, project_name, target, command):
 
         if bbprogress['event_type'] == 'CommandCompleted':
             break
+
+        if bbprogress['event_type'] == 'logging.LogRecord':
+            print(bbprogress['msg'])
         
         if bbprogress['event_type'] == 'CacheLoadStarted':
-            progress_send.send_progress(percentage=0, description='cache data load started')
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s), 
+                            percentage=0, description='cache data load started')
 
         if bbprogress['event_type'] == 'CacheLoadProgress':
-            progress_send.send_progress(percentage=int(int(bbprogress['current'])*100/int(bbprogress['total'])), description='cache data loading')
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s), 
+                            percentage=int(int(bbprogress['current'])*100/int(bbprogress['total'])), description='cache data loading')
 
         if bbprogress['event_type'] == 'CacheLoadCompleted':
-            progress_send.send_progress(percentage=100, description='cache data load succes with %d retry times' % bbprogress['num_entries'])
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s), 
+                            percentage=100, description='cache data load succes with %d retry times' % bbprogress['num_entries'])
 
         if bbprogress['event_type'] == 'ProcessStarted':
-            progress_send.send_progress(percentage=0, description='%s process started' % bbprogress['processname'])
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=0, description='%s process started' % bbprogress['processname'])
 
         if bbprogress['event_type'] == 'ProcessProgress':
-            progress_send.send_progress(percentage=int(bbprogress['progress']), description='%s process excuting' % bbprogress['processname'])
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=int(bbprogress['progress']), description='%s process excuting' % bbprogress['processname'])
             # TODO: Add Parse Progress
         if bbprogress['event_type'] == 'ProcessFinished':
-            progress_send.send_progress(percentage=100, description='%s process finished' % bbprogress['processname'])
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=100, description='%s process finished' % bbprogress['processname'])
 
         if bbprogress['event_type'] == 'runQueueTaskStarted':
-            progress_send.send_progress(percentage=int(int(bbprogress['current'])*100/int(bbprogress['total'])), description='%s scene queue task started' % bbprogress['taskstring'])
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=int(int(bbprogress['current'])*100/int(bbprogress['total'])), description='%s scene queue task started' % bbprogress['taskstring'])
+
+        if bbprogress['event_type'] == 'ParseStarted':
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=0, description='Parse started')
+
+        if bbprogress['event_type'] == 'ParseProgress':
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=int(int(bbprogress['current'])*100/int(bbprogress['total'])), description='Parsing')
+        
+        if bbprogress['event_type'] == 'ParseCompleted':
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            percentage=100, description='Parse Completed')
 
         # TODO: ParseFailed 处理
         # TODO: TaskBase 消息显示
-        if bbprogress['event_type'] == 'event_type':
-            progress_send.send_progress(description=bbprogress['message'])
+        if bbprogress['event_type'] == 'TaskBase':
+            period = datetime.utcnow().timestamp() - start_time
+            period_s = "{:.1f}".format(period)
+            progress_send.send_progress(header=('Bitbaking... %s seconds' % period_s),
+                            description=bbprogress['message'])
 
         # TODO: bitbake 错误处理
         if bbprogress['event_type'] == 'CommandFailed':
@@ -427,4 +489,3 @@ def project_export_task(self, project_id):
     progress_send.send_progress(percentage=0, description='project exporting')
     m = Migration()
     m.project_export(project_id)
-

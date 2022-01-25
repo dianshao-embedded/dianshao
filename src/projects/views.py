@@ -260,17 +260,33 @@ def install_task_create(request, project_id, mypackage_id):
             package = MyPackages.objects.get(id=mypackage_id)
             type = 'do_install'
             subtype = form.cleaned_data['type']
-            op1 = ("install -d %s" % form.cleaned_data['install_path'])
-            desc1 = ("enter %s" % form.cleaned_data['install_path'])
-            op2 = ("install -m %s %s/%s %s" % (form.cleaned_data['permission'], 
-                    form.cleaned_data['source_path'], form.cleaned_data['name'], 
-                    form.cleaned_data['install_path']))
-            desc2 = ("copy file %s to %s" % (form.cleaned_data['name'], form.cleaned_data['install_path']))
-            package.files_pn.append(form.cleaned_data['install_path'])
-            package.save()
+            if form.cleaned_data['is_directory'] == 'no':
+                op1 = ("install -d %s" % form.cleaned_data['install_path'])
+                desc1 = ("enter %s" % form.cleaned_data['install_path'])
+                op2 = ("install -m %s %s/%s %s" % (form.cleaned_data['permission'], 
+                        form.cleaned_data['source_path'], form.cleaned_data['name'], 
+                        form.cleaned_data['install_path']))
+                desc2 = ("copy file %s to %s" % (form.cleaned_data['name'], form.cleaned_data['install_path']))
+                installed_path = form.cleaned_data['install_path'].replace("${D}", "")
+                package.files_pn.append(installed_path)                
+                package.save()
 
-            Tasks.objects.create(package=package, type=type, subtype=subtype, op=op1, description=desc1)
-            Tasks.objects.create(package=package, type=type, subtype=subtype, op=op2, description=desc2)
+                Tasks.objects.create(package=package, type=type, subtype=subtype, op=op1, description=desc1)
+                Tasks.objects.create(package=package, type=type, subtype=subtype, op=op2, description=desc2)
+
+            elif form.cleaned_data['is_directory'] == 'yes':
+                op1 = ("install -d %s" % form.cleaned_data['install_path'])
+                desc1 = ("enter %s" % form.cleaned_data['install_path'])
+                op2 = ("cp -r %s/%s %s" % (form.cleaned_data['source_path'], 
+                    form.cleaned_data['name'], form.cleaned_data['install_path']))
+                desc2 = ("copy directory %s to %s" % (form.cleaned_data['name'], form.cleaned_data['install_path']))
+                installed_path = form.cleaned_data['install_path'].replace("${D}", "")
+                package.files_pn.append(installed_path)                
+                package.save()
+
+                Tasks.objects.create(package=package, type=type, subtype=subtype, op=op1, description=desc1)
+                Tasks.objects.create(package=package, type=type, subtype=subtype, op=op2, description=desc2)
+
         return redirect(reverse('projects:mypackage_detail', args=(project_id, mypackage_id)))
             
     return render(request, 'projects/install_task_create.html', context)

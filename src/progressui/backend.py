@@ -5,8 +5,9 @@ class ProgressSend():
         self.description = ""
         self.percentage = 0
         self.subProgress = []
+        self.header = ""
     
-    def send_progress(self, percentage=None, subProgress=[], description=""):
+    def send_progress(self, percentage=None, subProgress=[], description="", header=""):
         state = 'PROGRESS'
         if percentage is None:
             percentage = self.percentage
@@ -23,10 +24,16 @@ class ProgressSend():
         else:
             self.description = description
 
+        if header == "":
+            header = self.header
+        else:
+            self.header = header
+
         meta = {
             'percentage': percentage,
             'description': description,
             'subProgress': subProgress,
+            'header': header,
         }
         self.task.update_state(
             state=state,
