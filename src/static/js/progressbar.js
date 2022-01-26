@@ -8,11 +8,16 @@ class ProgressUI {
         this.mainBarElement = document.getElementById('mainBar')
         this.mainBarTextElement = document.getElementById('mainBarText')
         this.mainBarHeader = document.getElementById('mainBarHeader')
-        this.append_func = options.append_func || this.append_func;
+        this.success_append_func = options.success_append_func || this.success_append_func;
+        this.error_append_func = options.error_append_func || this.error_append_func
     }
 
-    append_func(result) {
-        console.log('progress ui end' + result)
+    error_append_func() {
+        console.log('task failed')
+    }
+
+    success_append_func() {
+        console.log('task success')
     }
 
     onProgress(percentage, description, header, barElement, barTextElement, barHeader) {
@@ -21,21 +26,18 @@ class ProgressUI {
         barHeader.textContent = header + " " + percentage + "%"
     }
     
-    onError(barElement, barTextElement, barHeader) {
+    onError(barElement) {
         barElement.style.width = '100%'
         barElement.style.backgroundColor = '#dc4f63'
-        barTextElement.textContent = "Please read the dianshao_bitbake.log to see the detail"
-        barHeader.textContent = "Bitbake Failed"
         $(".subBar").empty();
+        this.error_append_func();
     }
 
-    success(barElement, barTextElement, barHeader) {
+    success(barElement) {
         barElement.style.width = "100%";
-        barTextElement.textContent = "";
         barElement.style.backgroundColor = '#4be998';
-        barHeader.textContent = "Bitbake Success"
         $(".subBar").empty();
-        this.append_func('success');
+        this.success_append_func();
     }
 
     onRefreshView(subProgress) {
@@ -52,10 +54,10 @@ class ProgressUI {
             this.onProgress(data.percentage, data.description, data.header, this.mainBarElement, this.mainBarTextElement, this.mainBarHeader)
         } else if (data.state == 'SUCCESS') {
             console.log('Task SUCCESS')
-            this.success(this.mainBarElement, this.mainBarTextElement, this.mainBarHeader)
+            this.success(this.mainBarElement)
         } else if (data.state == 'FAILURE') {
             console.log('Task Failure')
-            this.onError(this.mainBarElement, this.mainBarTextElement, this.mainBarHeader)
+            this.onError(this.mainBarElement)
         }
     }
 

@@ -7,6 +7,7 @@
 </div>
 
 <div class="container" style="margin-top: 50px;">
+	<div id="mainBarHeader"></div>
 	<div class="barBackground">
 		<div class="mainBar", id="mainBar"></div>
 	</div>
@@ -20,12 +21,23 @@
 			window.location.href = "{% url 'projects:project' %}";
 		}
 		
-		$(function () {
+		function success_append() {
+			$("#mainBarHeader").text('Project Import Success');
+			window.location.href = "{% url 'projects:project' %}";
+		}
+
+		function error_append() {
+			$("#mainBarHeader").text('Project Import Failed');
+			window.location.href = "{% url 'projects:project' %}";
+		}
+
+    	$(function () {
 			var url = "{% url 'progressui:progress' task_id %}";
 			ProgressUI.initProgressBar(url, {
-				append_func: append,
-			});
-		});
+				success_append_func: success_append,
+				error_append_func: error_append,
+        	});
+    	});
 	</script>
 </div>
 

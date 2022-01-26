@@ -13,9 +13,21 @@
   <div id='subBarAnchor'>Bitbake Tasks</div>
   <script src="{% static 'js/progressbar.js' %}"></script>
   <script type="text/javascript">
+    function success_append() {
+      $("#mainBarHeader").text('Bitbake Success')
+    }
+
+    function error_append() {
+      $("#mainBarHeader").text('Bitbake Failed')
+      $("#mainBarText").text('Please read the dianshao_bitbake.log to see the detail')
+    }
+
     $(function () {
         var url = "{% url 'progressui:progress' task_id %}";
-        ProgressUI.initProgressBar(url);
+        ProgressUI.initProgressBar(url, {
+            success_append_func: success_append,
+            error_append_func: error_append,
+        });
     });
   </script>
 </div>
