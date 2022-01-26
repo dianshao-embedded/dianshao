@@ -489,3 +489,8 @@ def project_export_task(self, project_id):
     progress_send.send_progress(percentage=0, description='project exporting')
     m = Migration()
     m.project_export(project_id)
+
+@shared_task(bind=True)
+def create_wks_file(self, project_id, name, content):
+    wks = bbfile.DianshaoWksFile(project_id)
+    wks.create(name, content)

@@ -588,6 +588,24 @@ def myimage_detail(request, project_id, myimage_id):
 
     return render(request, 'projects/myimage_detail.html', context)
 
+def myimage_delete(request, project_id, myimage_id):
+    project = Project.objects.get(id=project_id)
+    myimage = MyImage.objects.get(id=myimage_id)
+    if request.method == 'POST':
+        result = shell_cmd_task.delay('rm %s' % 
+                    (path.join(project.project_path, project.project_name, 
+                    'meta/recipes-core/images', myimage.name+'.bb')), project.project_path)
+
+        while 1:
+            if (result._get_task_meta())["status"] == 'FAILURE':
+                raise Exception('shell command task error')
+            elif (result._get_task_meta())["status"] == 'SUCCESS':
+                break
+        myimage.delete()
+
+    return redirect(reverse('projects:myimages', args=(project_id,)))    
+
+
 def image_extra_marco_create(request, project_id, myimage_id):
     form = MyImageExtraMarcoModelForm()
     context = {
@@ -682,6 +700,35 @@ def myconf_update(request, project_id):
         return redirect(reverse('projects:mymeta', args=(project_id,)))    
     
     return render(request, 'projects/myconf_update.html', context)
+
+def add_wks_file(request, project_id, myimage_id):
+    form = LocalFileModelForm()
+    myimage = MyImage.objects.get(id=myimage_id)
+    context = {
+        'myimage_id': myimage_id,
+        'project_id': project_id,
+        'form': form
+    }
+
+    if request.method == 'POST':
+        form = LocalFileModelForm(request.POST)
+        if form.is_valid():
+            result = create_wks_file.delay(project_id, 
+                        form.cleaned_data['name'],
+                        form.cleaned_data['content'])
+
+            while 1:
+                if (result._get_task_meta())["status"] == 'FAILURE':
+                    raise Exception('shell command task error')
+                elif (result._get_task_meta())["status"] == 'SUCCESS':
+                    break
+            
+            myimage.wic_file = form.cleaned_data['name']
+            myimage.save()
+        
+        return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
+
+    return render(request, 'projects/create_wks_file.html', context)
 
 """
 def uboot_bitbake(request, project_id, myimage_id):

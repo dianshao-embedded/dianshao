@@ -131,6 +131,9 @@ class DianshaoBBFile():
             f.write('export GOARM = "${TARGET_GOARM}"\n')
             f.write('export GOCACHE = "${WORKDIR}/go/cache"\n')
 
+            if package.go_proxy != '':
+                f.write('export GOPROXY = "%s"\n' % package.go_proxy)
+                
             for env in package.go_env:
                 f.write('export %s\n' % env)
         
@@ -398,6 +401,9 @@ class DianshaoImageFile():
         f.write('inherit extrausers\n')
         f.write('EXTRA_USERS_PARAMS = "usermod -P root root;"\n')
 
+        if self.image.wic_file != "":
+            f.write('WKS_FILE = "%s"\n' % self.image.wic_file)
+
         for package in self.image.packages:
             f.write('IMAGE_INSTALL += "%s"\n' % package)
 
@@ -456,3 +462,29 @@ class DianshaoConfFile():
             content.writelines(lines)
             content.close()
         
+class DianshaoWksFile():
+    def __init__(self, project_id):
+        self.project = Project.objects.get(id=project_id)
+
+    def create(self, name, content):
+        file_path = os.path.join(self.project.project_path, 
+                    self.project.project_name, 'meta/wic')
+        
+        if not os.path.exists(file_path):
+            os.mkdir(file_path)
+
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
+        f = open(os.path.join(file_path, name), "w")
+        f.write(content)
+        f.close()
+
+        file_path = os.path.join(file_path, name)
+        with open(file_path, 'rb') as open_file:
+            content = open_file.read()
+    
+        content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+
+        with open(file_path, 'wb') as open_file:
+            open_file.write(content)
+            open_file.close()

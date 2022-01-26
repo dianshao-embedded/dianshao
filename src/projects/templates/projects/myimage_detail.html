@@ -26,9 +26,13 @@
     </div>
     {% if form.flash.value == 'SDCard' %}
     <div class="row">
-      <div class="twelve columns">
+      <div class="nine columns">
         <label>{{ form.wic_file.label }}</label>
         {{ form.wic_file }}
+      </div>
+      <div class="three columns">
+        <label><br></label>
+        <a href="{% url 'projects:add_wks_file' project_id myimage_id %}" class="button">Add Wks File</a>
       </div>
     </div>
     {% endif %}

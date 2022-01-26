@@ -18,6 +18,7 @@
           <th>Description</th>
           <th>Base</th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -29,6 +30,10 @@
           <td>
             <a href="{% url 'projects:myimage_detail' project_id myimage.id %}" class="button">Details</a>
           </td>
+          <form action="{% url 'projects:myimage_delete' project_id myimage.id %}" method="POST">
+            {% csrf_token %}
+            <td><input class="button" name="delete" type="submit" value="Delete"/></td>
+          </form>
         </tr>
         {% endfor %}
       </tbody>

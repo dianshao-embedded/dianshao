@@ -129,6 +129,7 @@ class MyPackages(models.Model):
     systemd_service_pn = models.CharField(max_length=120)
     config_file_path = models.CharField(max_length=120)
     go_env = ArrayField(models.CharField(max_length=120, blank=True))
+    go_proxy = models.CharField(max_length=120)
     files_pn = ArrayField(models.CharField(max_length=120, blank=True))
     extra_oemake = ArrayField(models.CharField(max_length=60, blank=True))
 

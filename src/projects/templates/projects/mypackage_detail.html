@@ -50,7 +50,11 @@
     </div>
     {% if form.language.value == "Golang" %}
     <div class="row">
-      <div class="twelve columns">
+      <div class="four columns">
+        <label>{{ form.go_proxy.label }}</label>
+        {{ form.go_proxy }}
+      </div>
+      <div class="eight columns">
         <label>{{ form.go_env.label }}</label>
         {{ form.go_env }}
       </div>

@@ -104,12 +104,12 @@ class MyPackagesModelForm(forms.ModelForm):
         model = MyPackages
         fields = ('name', 'type', 'version', 'license_default', 'license', 'lic_files_chksum',
                 'depends', 'description', 'local_files','src_url', 'src_rev', 'src_url_md5', 'extra_oemake',
-                'src_url_sha256', 'files_install_directory', 'building_directory', 'files_pn',
+                'src_url_sha256', 'files_install_directory', 'building_directory', 'files_pn', 'go_proxy',
                 'inherit', 'language', 'donwload_method', 'initial_method', 'systemd_auto_enable',
                 'systemd_service_name', 'config_file_path', 'go_env', 'source_directory', 'catagory')
         
         not_required = ('license_default', 'license', 'lic_files_chksum','depends', 'description', 'local_files',
-                'src_url', 'src_rev', 'src_url_md5','src_url_sha256', 'files_install_directory',
+                'src_url', 'src_rev', 'src_url_md5','src_url_sha256', 'files_install_directory', 'go_proxy',
                 'building_directory', 'inherit', 'initial_method', 'language', 'systemd_service_name', 'systemd_auto_enable', 
                 'config_file_path', 'go_env', 'source_directory', 'catagory', 'files_pn', 'extra_oemake')
 
@@ -138,6 +138,7 @@ class MyPackagesModelForm(forms.ModelForm):
             'systemd_service_name': forms.TextInput(attrs={'class': 'u-full-width'}),
             'config_file_path': forms.TextInput(attrs={'class': 'u-full-width'}),
             'go_env': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'go_proxy': forms.TextInput(attrs={'class': 'u-full-width'}),
             'source_directory': forms.TextInput(attrs={'class': 'u-full-width'}),
             'extra_oemake': forms.TextInput(attrs={'class': 'u-full-width'}),
         }
@@ -157,7 +158,8 @@ class MyPackagesModelForm(forms.ModelForm):
             'building_directory': 'Build Directory ($B)',
             'source_directory': 'Source Directory ($S)',
             'go_env': 'Extra Golang Env Variable (Seperate by comma)',
-            'extra_oemake': 'Extra Oemake ($EXTRA_OEMAKE, Seperate by comma)'
+            'extra_oemake': 'Extra Oemake ($EXTRA_OEMAKE, Seperate by comma)',
+            'go_proxy': 'GOPROXY'
         }
 
 class TaskModelForm(forms.ModelForm):
@@ -328,7 +330,7 @@ class MyImageModelForm(forms.ModelForm):
             'fs_name': forms.TextInput(attrs={'class': 'u-full-width'}),
             'fs_start': forms.TextInput(attrs={'class': 'u-full-width'}),
             'fs_end': forms.TextInput(attrs={'class': 'u-full-width'}),
-            'packages': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'packages': forms.Textarea(attrs={'class': 'u-full-width', "style":"height: 200px;"}),
         }
 
         labels = {
