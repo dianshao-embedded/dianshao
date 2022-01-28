@@ -6,3 +6,4 @@ assets/
 venv/
 .idea/
 .hugo_build.lock
+public/
