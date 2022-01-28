@@ -1,5 +1,5 @@
-baseURL = "http://localhost"
-title = "Geekdocs"
+baseURL = "https://dianshao-embedded.github.io/dianshao/"
+title = "Dianshao Docs"
 theme = "hugo-geekdoc"
 
 pluralizeListTitles = false
