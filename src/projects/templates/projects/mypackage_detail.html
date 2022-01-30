@@ -85,9 +85,13 @@
         <label>{{ form.source_directory.label }}</label>
         {{ form.source_directory }}
       </div>
-      <div class="eight columns">
+      <div class="four columns">
         <label>{{ form.depends.label }}</label>
         {{ form.depends }}
+      </div>
+      <div class="four columns">
+        <label>{{ form.inherit.label }}</label>
+        {{ form.inherit }}
       </div>
     </div>
     {% else %}

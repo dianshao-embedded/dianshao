@@ -164,8 +164,15 @@ def mypackage_create(request, project_id):
         if form.is_valid():
             form_obj = form.save(commit=False)
             form_obj.project = Project.objects.get(id=project_id)
+
+            if form_obj.initial_method == 'Systemd':
+                form_obj.inherit = "systemd"
+            elif form_obj.initial_method == 'System-V':
+                form_obj.inherit = 'update-rc.d'
+            
             if form_obj.language == 'Golang':
-                form_obj.depends = 'go-native'
+                form_obj.inherit += " goarch"
+
             if form_obj.donwload_method == 'git':
                 form_obj.building_directory = "$(WORKDIR)/git"
             form_obj.save()

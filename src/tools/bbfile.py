@@ -111,18 +111,8 @@ class DianshaoBBFile():
         """
         
         # generate inherit
-        if package.initial_method == 'Systemd':
-            if package.language == 'Golang':
-                f.write('inherit systemd goarch\n')
-            else:
-                f.write('inherit systemd\n')
-            f.write('SYSTEMD_AUTO_ENABLE = "%s"\n' % package.systemd_auto_enable)
-            f.write('SYSTEMD_SERVICE_${PN} = "%s"\n' % package.systemd_service_name)
-        elif package.initial_method == 'System-V':
-            if package.language == 'Golang':
-                f.write('inherit update-rc.d goarch\n')
-            else:
-                f.write('inherit update-rc.d\n')
+        if package.inherit != '':
+            f.write('inherit %s\n' % package.inherit)
 
         if package.language == 'Golang':
             f.write('export HOME = "${WORKDIR}"\n')
