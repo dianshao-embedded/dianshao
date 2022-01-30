@@ -124,7 +124,7 @@ class MyPackagesModelForm(forms.ModelForm):
             'version': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': '1.0.0'}),
             'license': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'MIT'}),
             'lic_files_chksum': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302'}),
-            'depends': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'depend packages'}),
+            'depends': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'seperate by space'}),
             'description': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'this is a xx software'}),
             'src_url': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'git://xxx.git;protocol=https;tag=v${PV}'}),
             'src_rev': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'when clone remote repo, you need to fill in'}),    
@@ -133,7 +133,7 @@ class MyPackagesModelForm(forms.ModelForm):
             'files_install_directory': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'The folder in the filesystem that you wish to mount'}),
             'building_directory': forms.TextInput(attrs={'class': 'u-full-width'}),
             'local_files': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'file://file1;file://file2...'}),
-            'inherit': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'inherit': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'seperate by space'}),
             'systemd_auto_enable': forms.Select(attrs={'class': 'u-full-width'}),
             'systemd_service_name': forms.TextInput(attrs={'class': 'u-full-width'}),
             'config_file_path': forms.TextInput(attrs={'class': 'u-full-width'}),
@@ -144,7 +144,7 @@ class MyPackagesModelForm(forms.ModelForm):
         }
 
         labels = {
-            'depends': 'Depends (You can enter multiple dependencies, separated by spaces)',
+            'depends': 'Depends',
             'src_rev': 'Src Revision',
             'src_url': 'Src Url',
             'src_url_md5': 'Src Url Md5',
