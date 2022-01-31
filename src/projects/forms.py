@@ -127,7 +127,7 @@ class MyPackagesModelForm(forms.ModelForm):
             'depends': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'seperate by space'}),
             'description': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'this is a xx software'}),
             'src_url': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'git://xxx.git;protocol=https;tag=v${PV}'}),
-            'src_rev': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'when clone remote repo, you need to fill in'}),    
+            'src_rev': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'If the git repo does not have tags, you need to fill in'}),    
             'src_url_md5': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'When downloading remote files, you need to fill in'}),
             'src_url_sha256': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'When downloading remote files, you need to fill in'}),
             'files_install_directory': forms.TextInput(attrs={'class': 'u-full-width', 'placeholder': 'The folder in the filesystem that you wish to mount'}),

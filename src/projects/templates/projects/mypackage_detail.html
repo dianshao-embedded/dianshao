@@ -136,6 +136,14 @@
       </div>
     </div>
     {% endif %}
+    {% if form.donwload_method.value == "git" %}
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.src_rev.label }}</label>
+        {{ form.src_rev }}
+      </div>
+    </div>
+    {% endif %}
     <input class="button" type="submit" style="width: 200px; margin-top: 10px;" value="Update Package">
   </form>
 </div>

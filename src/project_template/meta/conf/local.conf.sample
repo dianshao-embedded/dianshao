@@ -1,5 +1,5 @@
-DISTRO ??= "dianshao"
-MACHINE ??= "dianshao"
+DISTRO ??= "poky"
+MACHINE ??= "qemux86-64"
 
 # Parallel executed tasks
 BB_NUMBER_THREADS ??= "${@oe.utils.cpu_count()}"
