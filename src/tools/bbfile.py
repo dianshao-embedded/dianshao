@@ -114,6 +114,10 @@ class DianshaoBBFile():
         if package.inherit != '':
             f.write('inherit %s\n' % package.inherit)
 
+        if package.initial_method == 'Systemd':
+            f.write('SYSTEMD_AUTO_ENABLE = "%s"\n' % package.systemd_auto_enable)
+            f.write('SYSTEMD_SERVICE_${PN} = "%s"\n' % package.systemd_service_name)
+
         if package.language == 'Golang':
             f.write('export HOME = "${WORKDIR}"\n')
             f.write('export GOOS = "${TARGET_GOOS}"\n')
