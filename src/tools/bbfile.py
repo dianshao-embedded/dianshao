@@ -114,6 +114,10 @@ class DianshaoBBFile():
         if package.inherit != '':
             f.write('inherit %s\n' % package.inherit)
 
+        if package.initial_method == 'Systemd':
+            f.write('SYSTEMD_AUTO_ENABLE = "%s"\n' % package.systemd_auto_enable)
+            f.write('SYSTEMD_SERVICE_${PN} = "%s"\n' % package.systemd_service_name)
+
         if package.language == 'Golang':
             f.write('export HOME = "${WORKDIR}"\n')
             f.write('export GOOS = "${TARGET_GOOS}"\n')
@@ -409,6 +413,27 @@ class DianshaoImageFile():
                 
         f.close()
 
+    def create_update_file(self):
+        update_path = os.path.join(self.image.project.project_path, 
+                    self.image.project.project_name, 
+                    'meta/recipes-core/bundles', "update-bundle-" + self.image.name+'.bb')
+        if os.path.exists(update_path):
+            os.remove(update_path)
+
+        f = open(update_path, 'w')
+        f.write('# %s-%s\n' % (self.image.name, self.image.description))
+        f.write('# Auto Generate by Dianshao\n')
+        f.write('DESCRIPTION = "%s"\n' % self.image.description)
+        f.write('inherit bundle\n')
+        f.write('RAUC_BUNDLE_COMPATIBLE = "%s"\n' % self.image.compatible)
+        f.write('RAUC_BUNDLE_VERSION = "%s"\n' % self.image.version)
+        f.write('RAUC_BUNDLE_DESCRIPTION = "%s"\n' % self.image.description)
+        f.write('RAUC_BUNDLE_SLOTS = "rootfs"\n')
+        f.write('RAUC_SLOT_rootfs = "%s"\n' % self.image.name)
+        f.write('RAUC_SLOT_rootfs[fstype] = "%s"\n' % self.image.fs_type)
+
+        f.write('RAUC_KEY_FILE = "${THISDIR}/files/development.key.pem"\n')
+        f.write('RAUC_CERT_FILE = "${THISDIR}/files/development.cert.pem"\n')
 
 class DianshaoConfFile():
     def __init__(self, project_id):

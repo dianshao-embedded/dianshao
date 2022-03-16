@@ -6,7 +6,7 @@ from sqlite3 import Timestamp
 from celery import shared_task
 from progressui.backend import ProgressSend
 from git.repo.base import Repo
-from tools import shell, git, bbcommand, patch, bbfile
+from tools import shell, git, bbcommand, patch, bbfile, dishes
 from tools import migration
 from tools.migration import Migration
 from .models import MetaLayer, MyMachine, MyPackages, Project
@@ -465,6 +465,12 @@ def machinefile_create_task(self, mymachine_id):
 def imagefile_create_task(self, myimage_id):
     imagefile = bbfile.DianshaoImageFile(myimage_id)
     imagefile.create_image_file()
+    imagefile.create_update_file()
+
+@shared_task(bind=True)
+def imagefile_upload_task(self, myimage_id):
+    imageupload = dishes.DishesAgent(myimage_id)
+    imageupload.upload_package()
 
 @shared_task(bind=True)
 def config_set_task(self, project_id, machine, distro, pm, pt):

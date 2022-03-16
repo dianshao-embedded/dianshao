@@ -41,6 +41,7 @@ urlpatterns = [
     path('<int:project_id>/myimage/<int:myimage_id>/macro/<int:macro_id>/delete', views.image_extra_macro_delete, name='image_extra_macro_delete'),
     path('<int:project_id>/myimage/<int:myimage_id>/file', views.myimage_file, name='myimage_file'),
     path('<int:project_id>/myimage/<int:myimage_id>/bitbake', views.myimage_bitbake, name='myimage_bitbake'),
+    path('<int:project_id>/myimage/<int:myimage_id>/upload', views.myimage_upload, name='myimage_upload'),
     path('<int:project_id>/myimage/<int:myimage_id>/add_wks_file', views.add_wks_file, name='add_wks_file'),
     path('<int:project_id>/mymachine', views.mymachine, name='mymachine'),
     path('<int:project_id>/mypackages', views.mypackages, name='mypackages'),

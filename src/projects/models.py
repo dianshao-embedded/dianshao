@@ -260,6 +260,19 @@ class MyImage(models.Model):
     fs_start = models.CharField(max_length=30)
     fs_end = models.CharField(max_length=30)
     packages = ArrayField(models.CharField(max_length=60, blank=True))
+    compatible = models.CharField(max_length=60)
+    product_id = models.CharField(max_length=60)
+    file_path = models.CharField(max_length=200)
+    file_name = models.CharField(max_length=60)
+    dishes_url = models.CharField(max_length=100)
+
+    STAGE = [
+        ('dev', 'dev')
+    ]
+    stage = models.CharField(max_length=10, choices=STAGE)
+
+    version = models.CharField(max_length=60)
+    fs_type = models.CharField(max_length=10)
 
 
 class MyImagePackage(models.Model):
@@ -282,6 +295,21 @@ class MyImageExtraMarco(models.Model):
     ]
     strength = models.CharField(max_length=100, 
                         choices=VALUE_SETTING_STRENGTH_LEVEL)
+
+class Upgrade(models.Model):
+    image = models.ForeignKey(MyImage, on_delete=models.CASCADE)
+    compatible = models.CharField(max_length=60)
+    description = models.CharField(max_length=60)
+    product_id = models.CharField(max_length=60)
+    file_path = models.CharField(max_length=200)
+    file_name = models.CharField(max_length=60)
+
+    STAGE = [
+        ('dev', 'dev')
+    ]
+    stage = models.CharField(max_length=10, choices=STAGE)
+
+    version = models.CharField(max_length=60)
 
 # TODO：my machine 需要根据使用的芯片来确定，这部分放到后面去做，先选择使用的芯片厂家，然后生成需要配置的宏
 # 或者直接改成 my-uboot 和 my-kernel，根据 boot 和 kernel 的bbfile直接生成相应的宏

@@ -42,6 +42,46 @@
         {{ form.packages }}
       </div>
     </div>
+
+    <div class="row">
+      <div class="three columns">
+        <label>{{ form.compatible.label }}</label>
+        {{ form.compatible }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.product_id.label }}</label>
+        {{ form.product_id }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.fs_type.label }}</label>
+        {{ form.fs_type }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.version.label }}</label>
+        {{ form.version }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="six columns">
+        <label>{{ form.file_path.label }}</label>
+        {{ form.file_path }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.file_name.label }}</label>
+        {{ form.file_name }}
+      </div>
+      <div class="three columns">
+        <label>{{ form.stage.label }}</label>
+        {{ form.stage }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="twelve columns">
+        <label>{{ form.dishes_url.label }}</label>
+        {{ form.dishes_url }}
+      </div>
+    </div>
+
     <input class="button" type="submit" style="width: 210px; margin-top: 10px;" value="Update Image">
   </form>
 </div>
@@ -88,6 +128,12 @@
   <form action="{% url 'projects:myimage_bitbake' project_id myimage_id %}" method="post">
     {% csrf_token %}
     <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="Bitbake Image!!">
+  </form>
+  </div>
+  <div class="four columns">
+  <form action="{% url 'projects:myimage_upload' project_id myimage_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="@DISHES Image">
   </form>
   </div>
   </div>

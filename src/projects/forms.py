@@ -309,7 +309,8 @@ class MyImageModelForm(forms.ModelForm):
         model = MyImage
         fields = ['name', 'base', 'flash', 'description', 'wic_file', 'uboot_name',
                 'uboot_start', 'uboot_end', 'kernel_name', 'kernel_start', 'kernel_end',
-                'fs_name', 'fs_start', 'fs_end', 'packages']
+                'fs_name', 'fs_start', 'fs_end', 'packages', 'compatible', 'product_id',
+                'file_path', 'file_name', 'stage', 'version', 'fs_type', 'dishes_url']
 
         not_required = ['wic_file' ,'uboot_name', 'uboot_start', 'uboot_end',
                     'kernel_name', 'kernel_start', 'kernel_end', 'fs_name', 
@@ -331,6 +332,14 @@ class MyImageModelForm(forms.ModelForm):
             'fs_start': forms.TextInput(attrs={'class': 'u-full-width'}),
             'fs_end': forms.TextInput(attrs={'class': 'u-full-width'}),
             'packages': forms.Textarea(attrs={'class': 'u-full-width', "style":"height: 200px;"}),
+            'compatible': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'product_id': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'file_path': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'file_name': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'stage': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'version': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'fs_type': forms.TextInput(attrs={'class': 'u-full-width'}),
+            'dishes_url': forms.TextInput(attrs={'class': 'u-full-width'}),
         }
 
         labels = {

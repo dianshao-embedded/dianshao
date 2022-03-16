@@ -672,7 +672,7 @@ def myimage_bitbake(request, project_id, myimage_id):
 
     result = bitbake_progress.delay(project.project_path, 
                                     project.project_name, 
-                                    myimage.name, 'build')
+                                    "update-bundle-" + myimage.name, 'build')
 
     context={
         'task_id': result.task_id,
@@ -682,6 +682,16 @@ def myimage_bitbake(request, project_id, myimage_id):
     }
                                 
     return render(request, 'projects/image_bitbake.html', context)
+
+def myimage_upload(request, project_id, myimage_id):
+    result = imagefile_upload_task.delay(myimage_id)
+    while 1:
+        if (result._get_task_meta())["status"] == 'FAILURE':
+            raise Exception('task error')
+        elif (result._get_task_meta())["status"] == 'SUCCESS':
+            break
+                                
+    return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
 
 def myconf_update(request, project_id):
     form = MyConfForm()
