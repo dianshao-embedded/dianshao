@@ -314,7 +314,8 @@ class MyImageModelForm(forms.ModelForm):
 
         not_required = ['wic_file' ,'uboot_name', 'uboot_start', 'uboot_end',
                     'kernel_name', 'kernel_start', 'kernel_end', 'fs_name', 
-                    'fs_start', 'fs_end', 'packages']
+                    'fs_start', 'fs_end', 'packages', 'compatible', 'product_id',
+                'file_path', 'file_name', 'stage', 'version', 'fs_type', 'dishes_url']
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'u-full-width'}),
