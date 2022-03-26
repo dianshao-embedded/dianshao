@@ -251,22 +251,6 @@ If you are familiar with yocto, you will master dianshao quickly. If you are a b
  
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-<!-- ROADMAP -->
-## 开发计划
-
-
-- [ ] Bitbake progress ui optimization
-- [ ] Git clone task restart after failed
-- [ ] MyImage 
-    - [ ] Image build tools
-    - [ ] Image OTA support
-- [ ] MyPakcage
-    - [ ] System-V support
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
 <!-- CONTRIBUTING -->
 ## 贡献代码
 

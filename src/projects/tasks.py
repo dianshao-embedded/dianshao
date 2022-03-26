@@ -30,7 +30,7 @@ def project_initial_task(self, project_id, project_path, project_version, projec
 
     # TODO: 根据项目名自动生成 distro, image, machine, bblayer, conf.sample 等文件
     Repo.init(target_path)
-    progress_send.send_progress(percentage='25', description='Add Bitbake Submodule')
+    progress_send.send_progress(percentage='10', description='Add Bitbake Submodule')
 
     if project_version == 'HARDKNOTT':
         yocto_version = 'hardknott'
@@ -45,15 +45,13 @@ def project_initial_task(self, project_id, project_path, project_version, projec
         yocto_version = 'zeus'
         bitbake_version = '1.44'
 
-    # TODO: 任务失败恢复重新开始
-    submodule = git.git_submodule(target_path, 'bitbake',
-                    'https://github.com/openembedded/bitbake.git',
-                    bitbake_version)
-    submodule.start()
-
     path = os.path.join(project_path, project_name, 'bitbake')
-    i = 0
-    while(os.path.exists(path) == False and i < 3):
+    while(os.path.exists(path) == False):
+        submodule = git.git_submodule(target_path, 'bitbake',
+                        'https://github.com/openembedded/bitbake.git',
+                        bitbake_version)
+        submodule.start()
+
         while submodule.is_alive():
             try:
                 server.settimeout(5)
@@ -62,15 +60,10 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                 continue
             gitMessage = json.loads(byte.decode('ascii'))
             sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-            progress_send.send_progress(percentage='25',subProgress=sub, description='Add Bitbake Submodule')
+            progress_send.send_progress(percentage='10',subProgress=sub, description='Add Bitbake Submodule')
 
         if os.path.exists(path):
             break
-        else:
-            i += 1
-
-    if i == 3:
-        raise Exception('git clone error')
 
     bitbake_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bitbake')
     r, err = shell.shell_cmd(command=('cp -r %s %s' % (bitbake_path, target_path)), cwd = target_path)
@@ -78,16 +71,15 @@ def project_initial_task(self, project_id, project_path, project_version, projec
         server.close()
         raise Exception("project template build error: %s" % (r))
 
-    progress_send.send_progress(percentage='50', description='Add Openembedded-Core Submodule')
+    progress_send.send_progress(percentage='30', description='Add Openembedded-Core Submodule')
 
-    submodule = git.git_submodule(target_path, 'openembedded-core',
-                    'https://github.com/openembedded/openembedded-core.git',
-                    yocto_version)
-    submodule.start()
-    
     path = os.path.join(project_path, project_name, 'openembedded-core')
-    i = 0
-    while(os.path.exists(path) == False and i < 3):
+    while(os.path.exists(path) == False):
+        submodule = git.git_submodule(target_path, 'openembedded-core',
+                        'https://github.com/openembedded/openembedded-core.git',
+                        yocto_version)
+        submodule.start()
+        
         while submodule.is_alive():
             try:
                 server.settimeout(5)
@@ -96,15 +88,12 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                 continue
             gitMessage = json.loads(byte.decode('ascii'))
             sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-            progress_send.send_progress(percentage='50', subProgress=sub, description='Add Openembedded-Core Submodule')
+            progress_send.send_progress(percentage='30', subProgress=sub, description='Add Openembedded-Core Submodule')
         
         if os.path.exists(path):
             break
         else:
-            i += 1
-
-    if i == 3:
-        raise Exception('git clone error')
+            print("git clone failed\n")
 
     project = Project.objects.get(id=project_id)
     MetaLayer.objects.create(project=project, 
@@ -112,16 +101,14 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                             url='https://github.com/openembedded/openembedded-core.git',
                             remote_or_local = 'remote')
     
-    progress_send.send_progress(percentage='75', description='Add Meta-Yocto Submodule')
+    progress_send.send_progress(percentage='50', description='Add Meta-Yocto Submodule')
 
-    submodule = git.git_submodule(target_path, 'meta-yocto',
-                    'https://git.yoctoproject.org/meta-yocto.git',
-                    yocto_version)
-    submodule.start()
-
-    path = os.path.join(project_path, project_name, 'meta-yocto')
-    i = 0
-    while(os.path.exists(path) == False and i < 3):    
+    path = os.path.join(project_path, project_name, 'meta-yocto') 
+    while(os.path.exists(path) == False):   
+        submodule = git.git_submodule(target_path, 'meta-yocto',
+                        'https://git.yoctoproject.org/meta-yocto.git',
+                        yocto_version)
+        submodule.start()
 
         while submodule.is_alive():
             try:
@@ -131,15 +118,12 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                 continue
             gitMessage = json.loads(byte.decode('ascii'))
             sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
-            progress_send.send_progress(percentage='75', subProgress=sub, description='Add Meta-Yocto Submodule')               
+            progress_send.send_progress(percentage='50', subProgress=sub, description='Add Meta-Yocto Submodule')               
 
         if os.path.exists(path):
             break
         else:
-            i += 1
-
-    if i == 3:
-        raise Exception('git clone error')
+            print("git clone failed\n")
 
     MetaLayer.objects.create(project=project,
                             name='meta-yocto', 
@@ -151,7 +135,78 @@ def project_initial_task(self, project_id, project_path, project_version, projec
                             name='meta-yocto', 
                             url='https://git.yoctoproject.org/meta-yocto.git',
                             remote_or_local = 'remote',
-                            sub = 'meta-yocto-bsp')                          
+                            sub = 'meta-yocto-bsp')
+
+    progress_send.send_progress(percentage='70', description='Add Meta-Yocto Submodule')
+
+    path = os.path.join(project_path, project_name, 'meta-openembedded')
+    while(os.path.exists(path) == False): 
+        submodule = git.git_submodule(target_path, 'meta-openembedded',
+                        'https://github.com/openembedded/meta-openembedded.git',
+                        yocto_version)
+        submodule.start()   
+
+        while submodule.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage='70', subProgress=sub, description='Add Meta-Openembedded Submodule')               
+
+        if os.path.exists(path):
+            break
+        else:
+            print("git clone failed\n")
+
+    MetaLayer.objects.create(project=project,
+                            name='meta-openembedded', 
+                            url='https://github.com/openembedded/meta-openembedded.git',
+                            remote_or_local = 'remote',
+                            sub = 'meta-oe')
+
+    MetaLayer.objects.create(project=project,
+                            name='meta-openembedded', 
+                            url='https://github.com/openembedded/meta-openembedded.git',
+                            remote_or_local = 'remote',
+                            sub = 'meta-python')
+
+    MetaLayer.objects.create(project=project,
+                            name='meta-openembedded', 
+                            url='https://github.com/openembedded/meta-openembedded.git',
+                            remote_or_local = 'remote',
+                            sub = 'meta-networking')
+
+    progress_send.send_progress(percentage='90', description='Add Meta-Rauc Submodule')
+
+    path = os.path.join(project_path, project_name, 'meta-rauc')
+    while(os.path.exists(path) == False):    
+        submodule = git.git_submodule(target_path, 'meta-rauc',
+                        'https://github.com/rauc/meta-rauc.git',
+                        yocto_version)
+        submodule.start()
+
+        while submodule.is_alive():
+            try:
+                server.settimeout(5)
+                byte, addr = server.recvfrom(1024)
+            except:
+                continue
+            gitMessage = json.loads(byte.decode('ascii'))
+            sub = [{'percentage': int(gitMessage['cur_count']*100/gitMessage['max_count']), 'description': gitMessage['message']}]
+            progress_send.send_progress(percentage='90', subProgress=sub, description='Add Meta-Openembedded Submodule')               
+
+        if os.path.exists(path):
+            break
+        else:
+            print("git clone failed\n")
+
+    MetaLayer.objects.create(project=project,
+                            name='meta-rauc', 
+                            url='https://github.com/rauc/meta-rauc.git',
+                            remote_or_local = 'remote')
 
     ret, err = shell.shell_cmd(command=('unset BBPATH; bash -c \"source %s %s;\"' 
                                 % (os.path.join(target_path, 'oe-init-build-env'), os.path.join(target_path, 'build'))), 
@@ -465,6 +520,10 @@ def machinefile_create_task(self, mymachine_id):
 def imagefile_create_task(self, myimage_id):
     imagefile = bbfile.DianshaoImageFile(myimage_id)
     imagefile.create_image_file()
+
+@shared_task(bind=True)
+def updatefile_create_task(self, myimage_id):
+    imagefile = bbfile.DianshaoImageFile(myimage_id)
     imagefile.create_update_file()
 
 @shared_task(bind=True)

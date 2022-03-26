@@ -10,4 +10,8 @@ BBLAYERS ?= " \
   ##OEROOT##/openembedded-core/meta \
   ##OEROOT##/meta-yocto/meta-poky \
   ##OEROOT##/meta-yocto/meta-yocto-bsp \
+  ##OEROOT##/meta-openembedded/meta-oe \
+  ##OEROOT##/meta-openembedded/meta-python \
+  ##OEROOT##/meta-openembedded/meta-networking \
+  ##OEROOT##/meta-rauc \
 "

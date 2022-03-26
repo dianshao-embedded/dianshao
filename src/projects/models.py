@@ -96,8 +96,8 @@ class MyPackages(models.Model):
     ]
 
     CATAGORY = [
-        ('recipes-kernel', 'recipes-kernel'),
-        ('recipes-bsp', 'recipes-bsp'),
+        #('recipes-kernel', 'recipes-kernel'),
+        #('recipes-bsp', 'recipes-bsp'),
         ('recipes-dianshao', 'recipes-dianshao'),
     ]
 

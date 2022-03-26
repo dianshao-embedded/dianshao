@@ -137,8 +137,10 @@ class DianshaoBBFile():
         if package.config_file_path != '':
             f.write('CONFFILES_${PN} = "%s"\n' % package.config_file_path)
 
+        '''
         for file_pn in package.files_pn:
             f.write('FILES_${PN} += "%s"\n' % file_pn)
+        '''
 
         for em in extraMarco:
             if em.strength == 'normal':

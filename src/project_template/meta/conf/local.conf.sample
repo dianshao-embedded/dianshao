@@ -1,4 +1,4 @@
-DISTRO ??= "poky"
+DISTRO ??= "dianshao"
 MACHINE ??= "qemux86-64"
 
 # Parallel executed tasks

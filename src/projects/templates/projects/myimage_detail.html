@@ -130,6 +130,14 @@
     <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="Bitbake Image!!">
   </form>
   </div>
+  </div>
+  <div class="row">
+  <div class="four columns">
+  <form action="{% url 'projects:update_generate' project_id myimage_id %}" method="post">
+    {% csrf_token %}
+    <input class="button-primary" type="submit" style="width: 250px; margin-top: 10px;" value="Generate Update Package">
+  </form>
+  </div> 
   <div class="four columns">
   <form action="{% url 'projects:myimage_upload' project_id myimage_id %}" method="post">
     {% csrf_token %}

@@ -666,13 +666,54 @@ def myimage_file(request, project_id, myimage_id):
                                 
     return redirect(reverse('projects:myimage_detail', args=(project_id, myimage_id)))
 
+def update_generate(request, project_id, myimage_id):
+    project = Project.objects.get(id=project_id)
+    myimage = MyImage.objects.get(id=myimage_id)
+    result = updatefile_create_task.delay(myimage_id)
+    while 1:
+        if (result._get_task_meta())["status"] == 'FAILURE':
+            raise Exception('shell command task error')
+        elif (result._get_task_meta())["status"] == 'SUCCESS':
+            break
+
+    result = bitbake_progress.delay(project.project_path, 
+                                    project.project_name, 
+                                    'update-bundle-' + myimage.name, 'build')
+
+    context={
+        'task_id': result.task_id,
+        'project_id': project_id,
+        'myimage_id': myimage_id,
+        'image_name': myimage.name,
+    }
+                                
+    return render(request, 'projects/image_bitbake.html', context)
+
+
 def myimage_bitbake(request, project_id, myimage_id):
     project = Project.objects.get(id=project_id)
     myimage = MyImage.objects.get(id=myimage_id)
 
     result = bitbake_progress.delay(project.project_path, 
                                     project.project_name, 
-                                    "update-bundle-" + myimage.name, 'build')
+                                    myimage.name, 'build')
+
+    context={
+        'task_id': result.task_id,
+        'project_id': project_id,
+        'myimage_id': myimage_id,
+        'image_name': myimage.name,
+    }
+                                
+    return render(request, 'projects/image_bitbake.html', context)
+
+def myupdate_bitbake(request, project_id, myimage_id):
+    project = Project.objects.get(id=project_id)
+    myimage = MyImage.objects.get(id=myimage_id)
+
+    result = bitbake_progress.delay(project.project_path, 
+                                    project.project_name, 
+                                    'update-bundle-' + myimage.name, 'build')
 
     context={
         'task_id': result.task_id,

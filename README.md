@@ -24,6 +24,10 @@
   <p align="center">
     <a href="https://github.com/croakexciting/dianshao/blob/main/README-CN.md">中文说明</a>
   </p>
+
+  <p align="center">
+    <a href="https://dianshao-embedded.github.io/dishes-docs/">dianshao-docs</a>
+  </p>
 </div>
 
 <br/>
@@ -229,22 +233,6 @@ If you want to execute the bitbake command directly using the command line, Plea
 <!-- TODO: doc!!!! _For more examples, please refer to the [Documentation](https://example.com)_ -->
  
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ROADMAP -->
-## Roadmap
-
-
-- [ ] Bitbake progress ui optimization
-- [ ] Git clone task restart after failed
-- [ ] MyImage 
-    - [ ] Image build tools
-    - [ ] Image OTA support
-- [ ] MyPakcage
-    - [ ] System-V support
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
