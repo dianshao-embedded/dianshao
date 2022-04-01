@@ -22,7 +22,7 @@
   </p>
 
   <p align="center">
-    <a href="https://github.com/croakexciting/dianshao/blob/main/README-CN.md">中文说明</a>
+    <a href="https://github.com/dianshao-embedded/dianshao/blob/main/README-CN.md">中文说明</a>
   </p>
 
   <p align="center">
