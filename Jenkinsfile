@@ -1,21 +1,26 @@
 pipeline {
-    agent any 
+    agent any
+
+    environment {
+        DIANSHAO_YOCTO_PROJECT_PATH = '/home/geesat/dianshao/dianshao_yocto'
+    }
+
     stages {
         stage('container down') {
             steps {
-                sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml down'
+                sudo sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml down'
             }
         }
         
         stage('image build') {
             steps {
-                sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml build'
+                sudo sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml build'
             }
         }
         
         stage('container deploy') {
             steps {
-                sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml up -d'
+                sudo sh '/usr/local/bin/docker-compose -f docker-compose-using-host-network.yml up -d'
             }
         }
     }
